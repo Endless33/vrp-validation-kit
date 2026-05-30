@@ -147,3 +147,15 @@ Status
 Experimental validation harness for independent engineering review.
 
 The protocol architecture and validation suite continue to evolve through staged testing and external evaluation.
+
+---
+
+Validation Evidence
+
+The validation kit has been successfully executed in an independent Linux environment.
+
+Observed result:
+
+FINAL_VERDICT=VALIDATION_PASSED
+
+This demonstrates that the repository can be cloned, built, and executed without modification while producing deterministic validation results.
