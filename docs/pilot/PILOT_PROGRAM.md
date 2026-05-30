@@ -1,111 +1,211 @@
-VRP Pilot Program
+PILOT PROGRAM
 
-Overview
+Purpose
 
-The VRP Pilot Program is intended for engineering teams interested in evaluating continuity-oriented runtime behavior under unstable network conditions.
+The VRP Pilot Program exists to evaluate continuity-oriented execution models in real operating environments.
 
-The focus is execution correctness.
+The objective is not to demonstrate ideal conditions.
 
-The focus is not connectivity benchmarks.
+The objective is to evaluate behavior when instability occurs.
 
 ---
 
-Suitable Environments
+Pilot Philosophy
 
-Examples include:
+A pilot should answer one question:
 
-- VPN platforms
-- Edge infrastructure
+Does continuity preservation provide measurable value within a specific environment?
+
+The pilot program is designed to answer that question through observable runtime behavior, reproducible validation, and evidence collection.
+
+---
+
+Who Should Apply
+
+The pilot program is intended for organizations working with:
+
+- VPN infrastructure
+- Edge platforms
 - Distributed systems
-- Industrial systems
+- Mobile networking environments
 - Robotics platforms
-- IoT deployments
-- Critical infrastructure software
+- Industrial automation
+- Autonomous systems
+- Multi-site infrastructure
+- Reliability-sensitive applications
+
+The ideal participant already experiences instability, migration, failover, recovery events, or authority coordination challenges.
 
 ---
 
-Pilot Objectives
+What Pilots Evaluate
 
-Evaluate whether:
+Typical pilot objectives include:
 
-- Session continuity remains preserved
-- Authority transitions remain correct
-- Recovery remains deterministic
-- Replay conditions remain contained
-- Canonical execution remains stable
+- Session continuity preservation
+- Transport migration behavior
+- Authority transition correctness
+- Replay containment
+- Recovery consistency
+- Runtime restart behavior
+- Canonical execution preservation
+- Failure boundary enforcement
 
-under realistic failure conditions.
-
----
-
-Example Failure Conditions
-
-- Packet loss
-- Packet duplication
-- Packet reordering
-- NAT rebinding
-- Transport migration
-- Runtime restart
-- Authority transition
-- Network partition
+Each pilot may focus on a different subset of these objectives.
 
 ---
 
-Pilot Duration
+Pilot Structure
 
-Typical pilot duration:
+A pilot typically follows four phases:
 
-4–8 weeks
+1. Environment Assessment
+2. Integration Planning
+3. Controlled Validation
+4. Evidence Review
 
-The duration depends on:
-
-- Environment complexity
-- Integration scope
-- Validation requirements
+Progression between phases is based on technical evaluation rather than predefined timelines.
 
 ---
 
 Pilot Deliverables
 
-Possible outputs include:
+Pilot participants may receive:
 
-- Runtime evidence collection
-- Validation reports
-- Failure analysis
-- Integration findings
-- Continuity assessment
+- Validation guidance
+- Scenario definitions
+- Evaluation criteria
+- Runtime behavior explanations
+- Evidence review support
 
----
-
-Engineering Participation
-
-The pilot is intended for engineers willing to:
-
-- Run validation scenarios
-- Challenge assumptions
-- Review runtime behavior
-- Provide technical feedback
-
-The objective is independent evaluation.
+Deliverables depend on pilot scope and technical objectives.
 
 ---
 
 Success Criteria
 
-A pilot is considered successful if the participating team can independently observe and verify:
+Success is defined before pilot execution begins.
 
-- Session preservation
-- Recovery preservation
-- Authority correctness
-- Replay containment
-- Canonical execution preservation
+Examples include:
 
-under the agreed validation conditions.
+- Session continuity preserved during transport migration
+- Authority transitions remain monotonic
+- Replay attempts remain contained
+- Recovery behavior remains deterministic
+- Canonical execution history remains preserved
+
+Success criteria should be observable and measurable.
 
 ---
 
-Contact
+Evidence-Based Evaluation
 
-Pilot discussions:
+All conclusions should be based on evidence.
 
-riabovasvitalijus@gmail.com
+Examples:
+
+- Runtime traces
+- Validation reports
+- Decision logs
+- Recovery timelines
+- Failure reports
+
+Observable behavior is prioritized over assumptions.
+
+---
+
+Pilot Constraints
+
+The pilot program is intentionally limited.
+
+The objective is technical evaluation rather than broad deployment.
+
+Not every environment is expected to benefit equally from continuity-oriented execution.
+
+Negative findings are considered valid outcomes.
+
+---
+
+Private Runtime Boundary
+
+The pilot program evaluates behavior.
+
+It does not require disclosure of proprietary runtime implementation details.
+
+Evaluation focuses on:
+
+- Inputs
+- Observable decisions
+- Runtime outcomes
+- Validation evidence
+
+The implementation boundary remains private.
+
+---
+
+Expected Participant Contribution
+
+Participants are expected to provide:
+
+- Technical feedback
+- Failure observations
+- Runtime behavior analysis
+- Validation results
+- Operational insights
+
+Constructive criticism is encouraged.
+
+Pilot evaluation is intended to improve understanding of real-world requirements.
+
+---
+
+Current Pilot Focus Areas
+
+Current areas of interest include:
+
+- Transport instability
+- Recovery correctness
+- Authority management
+- Session continuity
+- Execution consistency
+- Runtime resilience
+
+Additional focus areas may be introduced as validation work evolves.
+
+---
+
+Program Outcomes
+
+Pilot outcomes generally fall into one of three categories:
+
+- Valuable
+- Potentially Valuable
+- Not Applicable
+
+All outcomes provide useful information.
+
+The purpose of the pilot is learning, not confirmation.
+
+---
+
+Long-Term Objective
+
+The long-term objective is to identify environments where continuity-oriented execution provides meaningful operational benefits.
+
+The pilot program exists to evaluate that hypothesis through observation, validation, and evidence.
+
+---
+
+Summary
+
+The VRP Pilot Program is an evidence-driven evaluation framework.
+
+The objective is not to prove that failures never occur.
+
+The objective is to determine whether execution correctness can remain preserved when failures inevitably occur.
+
+Validation first.
+
+Evidence first.
+
+Conclusions second.
