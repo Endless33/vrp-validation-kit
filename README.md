@@ -397,6 +397,26 @@ The objective is to make validation behavior observable and independently review
 
 ---
 
+# VRP Pilot Documentation
+
+This section contains documentation intended for organizations evaluating VRP in pilot environments.
+
+Documents:
+
+- PILOT_BOUNDARY_OVERVIEW.md
+- INTEGRATION_PATH.md
+- PILOT_PROGRAM.md
+
+These documents describe:
+
+- evaluation boundaries
+- integration flow
+- pilot structure
+- evidence expectations
+- validation objectives
+
+---
+
 Status
 
 Current validation status:
