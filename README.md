@@ -256,6 +256,28 @@ The validation kit demonstrates that execution correctness is enforced at admiss
 
 ---
 
+Failure Model Matrix
+
+Failure Condition| Expected Behavior| Validation Status
+Replay Packet| Rejected| Verified
+Duplicate Mutation| Rejected| Verified
+Commit Replay| Rejected| Verified
+Stale Authority| Rejected| Verified
+Authority Rollback| Rejected| Verified
+Stale Epoch| Rejected| Verified
+Transport Migration| Session Preserved| Verified
+Authority Migration| Monotonic Transition| Verified
+Runtime Recovery| Session Preserved| Verified
+Canonical History Validation| History Preserved| Verified
+
+The objective is not to prevent failures from occurring.
+
+The objective is to ensure that failures do not corrupt canonical execution state.
+
+Each validated failure condition is expected to produce deterministic and reproducible behavior.
+
+---
+
 Validation Philosophy
 
 The purpose of the validation kit is not to prove that networks never fail.
