@@ -1,5 +1,3 @@
----
-
 Closed Core Runner
 
 The validation kit also includes a closed-core runner preview distributed as prebuilt binaries.
