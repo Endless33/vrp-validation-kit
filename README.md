@@ -1,39 +1,37 @@
 VRP Validation Kit
 
-VRP Validation Kit is a standalone executable validation harness for testing core VRP continuity invariants.
+VRP Validation Kit is a standalone executable validation harness for validating core VRP continuity invariants.
 
-The purpose of this repository is not to expose implementation details.
+The goal is not to expose implementation details.
 
-The purpose is to provide a reproducible environment where engineers can execute validation scenarios and inspect runtime evidence directly.
-
----
-
-What Is Being Validated
-
-The validation kit focuses on execution correctness under unreliable network conditions.
-
-The following invariants are tested:
-
-- Duplicate logical mutations must not commit twice
-- Stale authority decisions must be rejected
-- Stale epochs must be rejected
-- Session identity must survive transport changes
-- Canonical execution must remain deterministic
-- Runtime evidence must be reproducible
+The goal is to provide a reproducible executable that engineers can run independently and inspect directly.
 
 ---
 
-Why This Exists
+Purpose
 
 Most networking demonstrations focus on connectivity.
 
-VRP focuses on execution continuity.
+VRP focuses on execution correctness.
 
 Transport may fail.
 
-Execution correctness must remain preserved.
+Execution correctness must remain deterministic.
 
-This validation kit allows independent engineers to observe the resulting behavior directly.
+This validation kit allows engineers to observe that behavior through reproducible runtime evidence.
+
+---
+
+Tested Invariants
+
+The validation kit currently validates:
+
+- Duplicate commit rejection
+- Stale authority rejection
+- Stale epoch rejection
+- Session identity preservation across transport migration
+- Authority migration correctness
+- Canonical commit history consistency
 
 ---
 
@@ -55,38 +53,97 @@ GOOS=linux GOARCH=amd64 go build -o vrp-test ./cmd/vrp-test
 
 Run
 
+Linux:
+
 ./vrp-test
 
-Example output:
+Windows:
+
+vrp-test.exe
+
+---
+
+Example Output
 
 === VRP VALIDATION KIT ===
+Runtime: standalone invariant validation harness
 
-TEST: duplicate mutation
+TEST: DUPLICATE MUTATION
+first_commit=true
+replayed_commit=false
+VERDICT=DUPLICATE_COMMIT_REJECTED
 
-RESULT:
-accepted=1
-rejected=1
+TEST: STALE AUTHORITY
+accepted=false
+VERDICT=STALE_AUTHORITY_REJECTED
 
-VERDICT:
-DUPLICATE_COMMIT_REJECTED
+TEST: STALE EPOCH
+accepted=false
+VERDICT=STALE_EPOCH_REJECTED
 
-FINAL_VERDICT:
-VALIDATION_PASSED
+TEST: TRANSPORT MIGRATION
+old_transport=wifi
+new_transport=lte
+session_before=session-alpha
+session_after=session-alpha
+VERDICT=SESSION_IDENTITY_PRESERVED
+
+TEST: AUTHORITY MIGRATION
+VERDICT=AUTHORITY_MIGRATION_PRESERVED
+
+TEST: CANONICAL HISTORY
+VERDICT=CANONICAL_HISTORY_CONSISTENT
+
+=== VALIDATION SUMMARY ===
+canonical_commits=2
+
+FINAL_VERDICT=VALIDATION_PASSED
 
 ---
 
 Validation Philosophy
 
-The goal is not to prove that networks never fail.
+The purpose of the validation kit is not to prove that networks never fail.
 
-The goal is to verify that execution correctness remains bounded and deterministic when failures occur.
+The purpose is to demonstrate that execution correctness remains bounded and deterministic when failures occur.
 
-Validation evidence should be observable, reproducible, and independently verifiable.
+Validation evidence should be:
+
+- Observable
+- Reproducible
+- Deterministic
+- Independently verifiable
+
+---
+
+What This Kit Demonstrates
+
+This kit demonstrates:
+
+- Deterministic commit admission
+- Monotonic authority transitions
+- Monotonic epoch progression
+- Duplicate mutation containment
+- Session continuity across transport changes
+
+---
+
+What This Kit Does Not Demonstrate
+
+This kit does not prove:
+
+- Production readiness
+- Formal verification
+- Cryptographic security
+- Performance characteristics
+- Regulatory compliance
+
+Those require separate validation processes.
 
 ---
 
 Status
 
-Experimental validation harness.
+Experimental validation harness for independent engineering review.
 
-The protocol and runtime architecture continue to evolve through staged validation and external review.
+The protocol architecture and validation suite continue to evolve through staged testing and external evaluation.
