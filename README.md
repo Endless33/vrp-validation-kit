@@ -1,3 +1,12 @@
+Quick Start
+
+1. Download prebuilt binary
+2. Run:
+   ./vrp-test-linux-amd64
+3. Inspect verdicts
+
+---
+
 VRP Validation Kit
 
 VRP Validation Kit is a standalone executable validation harness for validating core VRP continuity invariants.
