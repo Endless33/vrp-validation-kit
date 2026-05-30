@@ -1,299 +1,94 @@
-## Quick Start
-
-1. Download prebuilt binary
-2. Run:
-   ./vrp-test-linux-amd64
-3. Inspect verdicts
-
 ---
 
-VRP Validation Kit
+Closed Core Runner
 
-VRP Validation Kit is a standalone executable validation harness for validating core VRP continuity invariants.
+The validation kit also includes a closed-core runner preview distributed as prebuilt binaries.
 
-The goal is not to expose implementation details.
-
-The goal is to provide reproducible validation artifacts that engineers can execute independently and inspect directly.
-
----
-
-Purpose
-
-Most networking demonstrations focus on connectivity.
-
-VRP focuses on execution correctness.
-
-Transport may fail.
-
-Execution correctness must remain deterministic.
-
-This validation kit allows engineers to observe that behavior through reproducible runtime evidence.
-
----
-
-Who This Is For
-
-This validation kit is intended for:
-
-- Distributed systems engineers
-- Protocol designers
-- Reliability engineers
-- Network engineers
-- SREs (Site Reliability Engineers)
-- Researchers interested in execution correctness under transport instability
-
-The kit is designed for engineers who want to inspect observable protocol behavior through reproducible runtime evidence rather than conceptual descriptions alone.
-
----
-
-Tested Invariants
-
-The validation kit currently validates:
-
-- Duplicate commit rejection
-- Stale authority rejection
-- Stale epoch rejection
-- Session identity preservation across transport migration
-- Authority migration correctness
-- Replay window enforcement
-- Authority rollback rejection
-- Commit replay rejection
-- Session recovery preservation
-- Canonical commit history consistency
-
----
-
-No Dependencies
-
-Prebuilt binaries require:
-
-- No Go installation
-- No external libraries
-- No runtime configuration
-- No environment setup
-
-Download.
-
-Run.
-
-Inspect the verdicts.
-
----
-
-Build
+The runner exposes executable validation scenarios without exposing private implementation details.
 
 Linux:
 
-go build -o vrp-test ./cmd/vrp-test
+chmod +x vrp-core-runner-linux-amd64
+
+./vrp-core-runner-linux-amd64 --list
 
 Windows:
 
-go build -o vrp-test.exe ./cmd/vrp-test
+.\vrp-core-runner-windows-amd64.exe --list
 
-Cross-compile Linux binary from Windows:
+Available scenarios:
 
-$env:GOOS="linux"
-$env:GOARCH="amd64"
-
-go build -o vrp-test ./cmd/vrp-test
+replay-storm
+authority-rollback
+runtime-recovery
+transport-migration
+integrated-chaos
 
 ---
 
-Run
+Replay Window Scenario
 
 Linux:
 
-./vrp-test
+./vrp-core-runner-linux-amd64 --scenario replay-storm --packets 10000
 
 Windows:
 
-vrp-test.exe
+.\vrp-core-runner-windows-amd64.exe --scenario replay-storm --packets 10000
 
----
+Expected behavior:
 
-Integrated Runtime Scenario
+packets=10000
+accepted=1
+rejected=9999
 
-Run:
-
-go run ./cmd/vrp-runtime-scenario
-
-Expected verdict:
-
-FINAL_VERDICT=CONTINUITY_PRESERVED
-
----
-
-Running Prebuilt Binaries
-
-Windows:
-
-.\vrp-test-windows-amd64.exe
-
-.\vrp-runtime-scenario-windows-amd64.exe
-
-Linux:
-
-chmod +x vrp-test-linux-amd64
-chmod +x vrp-runtime-scenario-linux-amd64
-
-./vrp-test-linux-amd64
-./vrp-runtime-scenario-linux-amd64
-
-Expected results:
-
-FINAL_VERDICT=VALIDATION_PASSED
-
-and
-
-FINAL_VERDICT=CONTINUITY_PRESERVED
-
----
-
-Expected Runtime
-
-Validation execution typically completes in less than 10 seconds on modern hardware.
-
-The integrated runtime scenario typically completes in less than 10 seconds.
-
-No network connectivity is required.
-
-All validation scenarios execute locally and deterministically.
-
----
-
-Runtime Model
-
-mutation
-    ↓
-validation
-    ↓
-replay window
-    ↓
-authority check
-    ↓
-epoch check
-    ↓
-commit admission
-    ↓
-canonical history
-
-The validation kit demonstrates that execution correctness is enforced at admission boundaries before mutations become part of canonical history.
-
----
-
-Example Output
-
-=== VRP VALIDATION KIT ===
-Runtime: standalone invariant validation harness
-
-TEST: DUPLICATE MUTATION
-VERDICT=DUPLICATE_COMMIT_REJECTED
-
-TEST: STALE AUTHORITY
-VERDICT=STALE_AUTHORITY_REJECTED
-
-TEST: STALE EPOCH
-VERDICT=STALE_EPOCH_REJECTED
-
-TEST: TRANSPORT MIGRATION
-VERDICT=SESSION_IDENTITY_PRESERVED
-
-TEST: AUTHORITY MIGRATION
-VERDICT=AUTHORITY_MIGRATION_PRESERVED
-
-TEST: REPLAY WINDOW VALIDATION
 VERDICT=REPLAY_WINDOW_ENFORCED
 
-TEST: AUTHORITY ROLLBACK REJECTION
+This scenario validates replay admission behavior by repeatedly submitting the same sequence identifier through a replay window.
+
+---
+
+Authority Rollback Scenario
+
+Linux:
+
+./vrp-core-runner-linux-amd64 --scenario authority-rollback --epoch 5
+
+Windows:
+
+.\vrp-core-runner-windows-amd64.exe --scenario authority-rollback --epoch 5
+
+Expected behavior:
+
+current_epoch=10
+candidate_epoch=5
+
+rollback_accepted=false
+
 VERDICT=AUTHORITY_ROLLBACK_REJECTED
 
-TEST: COMMIT REPLAY REJECTION
-VERDICT=COMMIT_REPLAY_REJECTED
+This scenario validates epoch monotonicity and authority rollback containment.
 
-TEST: SESSION RECOVERY VALIDATION
+---
+
+Session Recovery Scenario
+
+Linux:
+
+./vrp-core-runner-linux-amd64 --scenario runtime-recovery
+
+Windows:
+
+.\vrp-core-runner-windows-amd64.exe --scenario runtime-recovery
+
+Expected behavior:
+
+session_preserved=true
+authority_preserved=true
+epoch_preserved=true
+history_preserved=true
+recovered=true
+
 VERDICT=SESSION_RECOVERY_PRESERVED
 
-TEST: CANONICAL HISTORY
-VERDICT=CANONICAL_HISTORY_CONSISTENT
-
-=== VALIDATION SUMMARY ===
-
-FINAL_VERDICT=VALIDATION_PASSED
-
----
-
-Validation Philosophy
-
-The purpose of the validation kit is not to prove that networks never fail.
-
-The purpose is to demonstrate that execution correctness remains bounded and deterministic when failures occur.
-
-Validation evidence should be:
-
-- Observable
-- Reproducible
-- Deterministic
-- Independently verifiable
-
----
-
-What This Kit Demonstrates
-
-This kit demonstrates:
-
-- Deterministic commit admission
-- Replay containment
-- Monotonic authority transitions
-- Authority rollback rejection
-- Monotonic epoch progression
-- Duplicate mutation containment
-- Commit replay protection
-- Session continuity across transport changes
-- Snapshot-based session recovery
-- Canonical execution history preservation
-
----
-
-What This Kit Does Not Demonstrate
-
-This kit does not prove:
-
-- Production readiness
-- Formal verification
-- Cryptographic security
-- Performance characteristics
-- Regulatory compliance
-- Resistance to all adversarial conditions
-
-Those require separate validation processes.
-
----
-
-Validation Evidence
-
-The validation kit has been successfully executed across independent environments.
-
-Verified environments:
-
-- Windows 11
-- Linux (Termux)
-- Oracle Cloud Linux
-
-Observed results:
-
-FINAL_VERDICT=VALIDATION_PASSED
-
-FINAL_VERDICT=CONTINUITY_PRESERVED
-
-This demonstrates that the repository can be cloned, built, and executed without modification while producing deterministic validation results.
-
----
-
-Status
-
-Current validation status:
-
-VALIDATION_PASSED
-CONTINUITY_PRESERVED
-
-The protocol architecture and validation suite continue to evolve through staged testing and external engineering review.
+This scenario validates snapshot-based recovery and restoration consistency.
