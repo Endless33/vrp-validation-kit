@@ -67,6 +67,16 @@ vrp-test.exe
 
 ---
 
+Integrated Runtime Scenario
+
+go run ./cmd/vrp-runtime-scenario
+
+Expected verdict:
+
+FINAL_VERDICT=CONTINUITY_PRESERVED
+
+---
+
 Example Output
 
 === VRP VALIDATION KIT ===
