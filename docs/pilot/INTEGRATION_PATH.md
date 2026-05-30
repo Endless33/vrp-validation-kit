@@ -1,123 +1,202 @@
-VRP Integration Path
+INTEGRATION PATH
 
 Purpose
 
-This document describes how a pilot integration of VRP may be performed.
+This document describes the expected path from initial evaluation to pilot integration.
 
-The goal is not to replace an existing product.
-
-The goal is to evaluate whether execution correctness can remain preserved during transport instability.
+The goal is to provide a structured process for organizations interested in evaluating continuity-oriented execution models.
 
 ---
 
-High-Level Model
+Stage 1 — Public Evaluation
 
-Application Runtime
-        ↓
-VRP Integration Adapter
-        ↓
-VRP Core Runtime
-        ↓
+The first step is independent evaluation.
+
+Organizations are encouraged to review:
+
+- VRP Validation Kit
+- Runtime Boundary Preview
+- Validation reports
+- Runtime evidence
+- Executable validation scenarios
+
+At this stage the objective is simple:
+
+Determine whether the observed behavior is interesting enough to justify deeper evaluation.
+
+---
+
+Stage 2 — Technical Discussion
+
+If the validation results appear relevant, a technical discussion may be initiated.
+
+Typical discussion topics include:
+
+- Current architecture
+- Failure conditions
+- Recovery requirements
+- Session continuity requirements
+- Existing transport model
+- Operational constraints
+
+The purpose is to understand whether the target environment contains continuity-sensitive workloads.
+
+---
+
+Stage 3 — Environment Assessment
+
+Not every environment benefits equally from continuity-oriented execution.
+
+Potential evaluation targets include:
+
+- VPN infrastructure
+- Edge computing
+- Industrial systems
+- Robotics platforms
+- Autonomous systems
+- Distributed control systems
+- Multi-network environments
+- Mobile infrastructure
+
+The objective is to identify where transport instability can directly impact execution correctness.
+
+---
+
+Stage 4 — Pilot Scope Definition
+
+A pilot begins with a clearly defined scope.
+
+Typical pilot objectives include:
+
+- Recovery validation
+- Authority transition validation
+- Session continuity validation
+- Replay containment validation
+- Transport migration validation
+- Runtime recovery validation
+
+Success criteria should be measurable and agreed upon before implementation begins.
+
+---
+
+Stage 5 — Integration Boundary Definition
+
+The pilot defines a strict integration boundary.
+
+VRP is intended to operate as an execution correctness layer.
+
+The surrounding application remains unchanged.
+
+Example:
+
+Application
+↓
+Runtime Adapter
+↓
+VRP Boundary
+↓
 Transport Layer
 
-VRP operates between application execution and transport delivery.
-
-Transport is treated as replaceable.
-
-Session identity remains canonical.
+The objective is minimal disruption to existing architecture.
 
 ---
 
-Pilot Flow
+Stage 6 — Controlled Evaluation
 
-Phase 1 — Technical Discussion
+The pilot environment executes predefined scenarios.
 
-Objectives:
+Examples:
 
-- Understand the target environment
-- Review failure conditions
-- Review runtime architecture
-- Define pilot scope
+- Transport interruption
+- Transport migration
+- Authority transition
+- Runtime restart
+- Replay injection
+- Failure recovery
 
-Deliverable:
-
-- Pilot evaluation plan
-
----
-
-Phase 2 — Architecture Review
-
-Objectives:
-
-- Identify integration boundaries
-- Identify authority ownership
-- Identify state mutation sources
-- Identify recovery requirements
-
-Deliverable:
-
-- Integration design document
+Observed behavior is compared against expected behavior.
 
 ---
 
-Phase 3 — Adapter Integration
+Stage 7 — Evidence Collection
 
-Objectives:
+Pilot execution should produce observable evidence.
 
-- Connect runtime events
-- Connect authority transitions
-- Connect recovery hooks
-- Connect observability outputs
+Examples:
 
-Deliverable:
+- Validation reports
+- Runtime traces
+- Recovery reports
+- Decision logs
+- Failure reports
 
-- Pilot integration build
-
----
-
-Phase 4 — Validation
-
-Objectives:
-
-- Inject instability
-- Simulate transport migration
-- Simulate replay conditions
-- Simulate recovery scenarios
-
-Deliverable:
-
-- Validation report
+The objective is independent verification of behavior.
 
 ---
 
-Phase 5 — Pilot Operation
+Stage 8 — Outcome Review
 
-Objectives:
+Pilot outcomes should answer a simple question:
 
-- Execute under real conditions
-- Collect runtime evidence
-- Observe continuity behavior
+Did continuity-oriented execution provide measurable value within the target environment?
 
-Deliverable:
+Possible outcomes:
 
-- Pilot assessment report
+- Valuable
+- Partially valuable
+- Not applicable
 
----
+All outcomes are acceptable.
 
-Evaluation Criteria
-
-A pilot is considered successful if:
-
-- Session identity remains preserved
-- Authority transitions remain monotonic
-- Replay conditions remain contained
-- Recovery remains deterministic
-- Canonical execution remains preserved
+The objective is understanding, not confirmation bias.
 
 ---
 
-Expected Outcome
+Pilot Principles
 
-The objective is not to prove that networks never fail.
+Pilot participation is based on:
 
-The objective is to evaluate whether failures can occur without corrupting canonical execution state.
+- Technical evaluation
+- Observable evidence
+- Reproducible behavior
+- Defined success criteria
+
+Pilot participation is not based on marketing claims.
+
+---
+
+What Pilot Participants Can Expect
+
+Participants can expect:
+
+- Technical discussions
+- Validation guidance
+- Scenario planning
+- Architecture review
+- Runtime evaluation
+
+The goal is practical assessment under real operating conditions.
+
+---
+
+Long-Term Goal
+
+The long-term objective is to determine where continuity-oriented execution models provide meaningful operational advantages.
+
+The pilot process exists to answer that question through observation, evidence, and reproducible evaluation.
+
+---
+
+Summary
+
+Public validation comes first.
+
+Technical evaluation comes second.
+
+Pilot integration comes third.
+
+Evidence drives conclusions.
+
+Observable behavior matters more than assumptions.
+
+The objective is to evaluate continuity under real-world instability and determine where it provides measurable value.
