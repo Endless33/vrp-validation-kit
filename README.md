@@ -4,7 +4,7 @@ VRP Validation Kit is a standalone executable validation harness for validating 
 
 The goal is not to expose implementation details.
 
-The goal is to provide a reproducible executable that engineers can run independently and inspect directly.
+The goal is to provide reproducible validation artifacts that engineers can execute independently and inspect directly.
 
 ---
 
@@ -51,7 +51,10 @@ go build -o vrp-test.exe ./cmd/vrp-test
 
 Cross-compile Linux binary from Windows:
 
-GOOS=linux GOARCH=amd64 go build -o vrp-test ./cmd/vrp-test
+$env:GOOS="linux"
+$env:GOARCH="amd64"
+
+go build -o vrp-test ./cmd/vrp-test
 
 ---
 
@@ -69,9 +72,37 @@ vrp-test.exe
 
 Integrated Runtime Scenario
 
+Run:
+
 go run ./cmd/vrp-runtime-scenario
 
 Expected verdict:
+
+FINAL_VERDICT=CONTINUITY_PRESERVED
+
+---
+
+Running Prebuilt Binaries
+
+Windows:
+
+.\vrp-test-windows-amd64.exe
+
+.\vrp-runtime-scenario-windows-amd64.exe
+
+Linux:
+
+chmod +x vrp-test-linux-amd64
+chmod +x vrp-runtime-scenario-linux-amd64
+
+./vrp-test-linux-amd64
+./vrp-runtime-scenario-linux-amd64
+
+Expected results:
+
+FINAL_VERDICT=VALIDATION_PASSED
+
+and
 
 FINAL_VERDICT=CONTINUITY_PRESERVED
 
@@ -168,11 +199,21 @@ Those require separate validation processes.
 
 Validation Evidence
 
-The validation kit has been successfully executed in an independent Linux environment.
+The validation kit has been successfully executed across independent environments.
+
+Verified environments:
+
+- Windows 11
+- Linux (Termux)
+- Oracle Cloud Linux
 
 Observed result:
 
 FINAL_VERDICT=VALIDATION_PASSED
+
+and
+
+FINAL_VERDICT=CONTINUITY_PRESERVED
 
 This demonstrates that the repository can be cloned, built, and executed without modification while producing deterministic validation results.
 
@@ -183,5 +224,6 @@ Status
 Current validation status:
 
 VALIDATION_PASSED
+CONTINUITY_PRESERVED
 
 The protocol architecture and validation suite continue to evolve through staged testing and external engineering review.
