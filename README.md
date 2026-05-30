@@ -31,6 +31,10 @@ The validation kit currently validates:
 - Stale epoch rejection
 - Session identity preservation across transport migration
 - Authority migration correctness
+- Replay window enforcement
+- Authority rollback rejection
+- Commit replay rejection
+- Session recovery preservation
 - Canonical commit history consistency
 
 ---
@@ -69,33 +73,37 @@ Example Output
 Runtime: standalone invariant validation harness
 
 TEST: DUPLICATE MUTATION
-first_commit=true
-replayed_commit=false
 VERDICT=DUPLICATE_COMMIT_REJECTED
 
 TEST: STALE AUTHORITY
-accepted=false
 VERDICT=STALE_AUTHORITY_REJECTED
 
 TEST: STALE EPOCH
-accepted=false
 VERDICT=STALE_EPOCH_REJECTED
 
 TEST: TRANSPORT MIGRATION
-old_transport=wifi
-new_transport=lte
-session_before=session-alpha
-session_after=session-alpha
 VERDICT=SESSION_IDENTITY_PRESERVED
 
 TEST: AUTHORITY MIGRATION
 VERDICT=AUTHORITY_MIGRATION_PRESERVED
 
+TEST: REPLAY WINDOW VALIDATION
+VERDICT=REPLAY_WINDOW_ENFORCED
+
+TEST: AUTHORITY ROLLBACK REJECTION
+VERDICT=AUTHORITY_ROLLBACK_REJECTED
+
+TEST: COMMIT REPLAY REJECTION
+VERDICT=COMMIT_REPLAY_REJECTED
+
+TEST: SESSION RECOVERY VALIDATION
+VERDICT=SESSION_RECOVERY_PRESERVED
+
 TEST: CANONICAL HISTORY
 VERDICT=CANONICAL_HISTORY_CONSISTENT
 
 === VALIDATION SUMMARY ===
-canonical_commits=2
+canonical_commits=3
 
 FINAL_VERDICT=VALIDATION_PASSED
 
@@ -121,10 +129,15 @@ What This Kit Demonstrates
 This kit demonstrates:
 
 - Deterministic commit admission
+- Replay containment
 - Monotonic authority transitions
+- Authority rollback rejection
 - Monotonic epoch progression
 - Duplicate mutation containment
+- Commit replay protection
 - Session continuity across transport changes
+- Snapshot-based session recovery
+- Canonical execution history preservation
 
 ---
 
@@ -137,16 +150,9 @@ This kit does not prove:
 - Cryptographic security
 - Performance characteristics
 - Regulatory compliance
+- Resistance to all adversarial conditions
 
 Those require separate validation processes.
-
----
-
-Status
-
-Experimental validation harness for independent engineering review.
-
-The protocol architecture and validation suite continue to evolve through staged testing and external evaluation.
 
 ---
 
@@ -159,3 +165,13 @@ Observed result:
 FINAL_VERDICT=VALIDATION_PASSED
 
 This demonstrates that the repository can be cloned, built, and executed without modification while producing deterministic validation results.
+
+---
+
+Status
+
+Current validation status:
+
+VALIDATION_PASSED
+
+The protocol architecture and validation suite continue to evolve through staged testing and external engineering review.
