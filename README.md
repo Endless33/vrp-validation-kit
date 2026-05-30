@@ -37,6 +37,7 @@ This validation kit is intended for:
 - Network engineers
 - Site Reliability Engineers (SREs)
 - Infrastructure engineers
+- Platform engineers
 - Researchers interested in execution correctness under transport instability
 
 The kit is designed for engineers who want observable runtime behavior rather than conceptual descriptions.
@@ -226,6 +227,36 @@ This scenario validates snapshot creation, runtime failure simulation, and recov
 
 ---
 
+Transport Migration Scenario
+
+Linux:
+
+./vrp-core-runner-linux-amd64 --scenario transport-migration --hops 50
+
+Windows:
+
+.\vrp-core-runner-windows-amd64.exe --scenario transport-migration --hops 50
+
+Expected behavior:
+
+hops=50
+
+session_before=session-alpha
+session_after=session-alpha
+
+session_preserved=true
+authority_preserved=true
+epoch_preserved=true
+history_preserved=true
+
+VERDICT=TRANSPORT_MIGRATION_PRESERVED
+
+This scenario validates repeated transport migration events while preserving session identity, authority state, epoch continuity, and canonical execution history.
+
+The scenario simulates multiple transport transitions and verifies that execution state remains stable across migration boundaries.
+
+---
+
 Expected Runtime
 
 Validation execution typically completes in less than 10 seconds on modern hardware.
@@ -306,6 +337,7 @@ This kit demonstrates:
 - Duplicate mutation containment
 - Commit replay protection
 - Session continuity across transport changes
+- Transport migration preservation
 - Snapshot-based recovery
 - Canonical execution history preservation
 
@@ -344,8 +376,24 @@ FINAL_VERDICT=CONTINUITY_PRESERVED
 VERDICT=REPLAY_WINDOW_ENFORCED
 VERDICT=AUTHORITY_ROLLBACK_REJECTED
 VERDICT=SESSION_RECOVERY_PRESERVED
+VERDICT=TRANSPORT_MIGRATION_PRESERVED
 
 This demonstrates that the repository can be cloned, built, executed, and validated without modification while producing deterministic results.
+
+---
+
+External Evaluation
+
+The repository also contains:
+
+- Failure models
+- Failure → invariant mappings
+- External validation guides
+- Pilot evaluation templates
+- Pilot success criteria
+- Evidence indexes
+
+The objective is to make validation behavior observable and independently reviewable by external engineers.
 
 ---
 
@@ -358,5 +406,6 @@ CONTINUITY_PRESERVED
 REPLAY_WINDOW_ENFORCED
 AUTHORITY_ROLLBACK_REJECTED
 SESSION_RECOVERY_PRESERVED
+TRANSPORT_MIGRATION_PRESERVED
 
 The protocol architecture and validation suite continue to evolve through staged testing, executable validation scenarios, and external engineering review.
