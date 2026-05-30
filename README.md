@@ -22,6 +22,21 @@ This validation kit allows engineers to observe that behavior through reproducib
 
 ---
 
+Who This Is For
+
+This validation kit is intended for:
+
+- Distributed systems engineers
+- Protocol designers
+- Reliability engineers
+- Network engineers
+- SREs (Site Reliability Engineers)
+- Researchers interested in execution correctness under transport instability
+
+The kit is designed for engineers who want to inspect observable protocol behavior through reproducible runtime evidence rather than conceptual descriptions alone.
+
+---
+
 Tested Invariants
 
 The validation kit currently validates:
@@ -36,6 +51,23 @@ The validation kit currently validates:
 - Commit replay rejection
 - Session recovery preservation
 - Canonical commit history consistency
+
+---
+
+No Dependencies
+
+Prebuilt binaries require:
+
+- No Go installation
+- No external libraries
+- No runtime configuration
+- No environment setup
+
+Download.
+
+Run.
+
+Inspect the verdicts.
 
 ---
 
@@ -108,6 +140,38 @@ FINAL_VERDICT=CONTINUITY_PRESERVED
 
 ---
 
+Expected Runtime
+
+Validation execution typically completes in less than 10 seconds on modern hardware.
+
+The integrated runtime scenario typically completes in less than 10 seconds.
+
+No network connectivity is required.
+
+All validation scenarios execute locally and deterministically.
+
+---
+
+Runtime Model
+
+mutation
+    ↓
+validation
+    ↓
+replay window
+    ↓
+authority check
+    ↓
+epoch check
+    ↓
+commit admission
+    ↓
+canonical history
+
+The validation kit demonstrates that execution correctness is enforced at admission boundaries before mutations become part of canonical history.
+
+---
+
 Example Output
 
 === VRP VALIDATION KIT ===
@@ -144,7 +208,6 @@ TEST: CANONICAL HISTORY
 VERDICT=CANONICAL_HISTORY_CONSISTENT
 
 === VALIDATION SUMMARY ===
-canonical_commits=3
 
 FINAL_VERDICT=VALIDATION_PASSED
 
@@ -207,11 +270,9 @@ Verified environments:
 - Linux (Termux)
 - Oracle Cloud Linux
 
-Observed result:
+Observed results:
 
 FINAL_VERDICT=VALIDATION_PASSED
-
-and
 
 FINAL_VERDICT=CONTINUITY_PRESERVED
 
