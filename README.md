@@ -60,6 +60,30 @@ FINAL_VERDICT=ATTACK_SUITE_PASSED
 
 ---
 
+Evidence Verification
+
+Execute:
+
+go run ./cmd/evidence-verify --file evidence/sample/core-evidence.json
+
+Expected result:
+
+FINAL_VERDICT=EVIDENCE_VERIFIED
+
+---
+
+Tamper Rejection
+
+Execute:
+
+go run ./cmd/evidence-verify --file evidence/sample/tampered-evidence.json
+
+Expected result:
+
+FINAL_VERDICT=EVIDENCE_VERIFY_FAILED
+
+---
+
 What The Attack Suite Tests
 
 Current attack scenarios:
@@ -98,6 +122,8 @@ Current validation coverage includes:
 - Runtime recovery preservation
 - Transport migration preservation
 - Canonical history protection
+- Evidence bundle verification
+- Evidence tamper detection
 
 ---
 
@@ -122,9 +148,11 @@ Suggested review process:
 3. Execute validation harness
 4. Execute runtime scenario
 5. Execute attack suite
-6. Review verdicts
-7. Review documentation
-8. Attempt independent validation
+6. Execute evidence verification
+7. Execute tamper verification
+8. Review verdicts
+9. Review documentation
+10. Attempt independent validation
 
 The objective is not agreement.
 
@@ -137,6 +165,7 @@ What Is Included
 - Validation harness
 - Runtime scenario
 - External attack suite
+- Evidence verifier
 - Validation documentation
 - Failure models
 - Invariant mappings
