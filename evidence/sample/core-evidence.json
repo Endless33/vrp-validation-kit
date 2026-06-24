@@ -1,0 +1,31 @@
+{
+  "schema_version": "vrp-evidence-v1",
+  "protocol": "VRP",
+  "scenario": "external-validation-sample",
+  "core_version": "closed-core-public-evidence-preview",
+  "generated_at": "2026-06-24T08:30:00Z",
+  "session_id": "session-alpha",
+  "authority_id": "authority-b",
+  "epoch": 11,
+  "invariants": {
+    "session_identity_preserved": true,
+    "authority_monotonicity_preserved": true,
+    "replay_containment_preserved": true,
+    "canonical_history_preserved": true,
+    "runtime_recovery_preserved": true
+  },
+  "verdicts": [
+    "SESSION_IDENTITY_PRESERVED",
+    "AUTHORITY_ROLLBACK_REJECTED",
+    "REPLAY_WINDOW_ENFORCED",
+    "CANONICAL_HISTORY_CONSISTENT",
+    "SESSION_RECOVERY_PRESERVED"
+  ],
+  "counts": {
+    "accepted_commits": 3,
+    "rejected_replays": 9999,
+    "transport_migrations": 1000,
+    "history_entries": 3
+  },
+  "evidence_hash": "PLACEHOLDER"
+}
