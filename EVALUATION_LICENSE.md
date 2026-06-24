@@ -13,7 +13,7 @@ You may:
 - Clone the repository
 - Build the repository
 - Execute validation scenarios
-- Review source code included in this repository
+- Review repository source code
 - Perform independent testing
 - Publish evaluation results referencing this repository
 
@@ -21,14 +21,13 @@ Restrictions
 
 You may not:
 
-- Represent this repository or its contents as your own work
 - Remove authorship information
-- Redistribute modified versions as original VRP technology
-- Claim authorship of the repository contents
-- Use repository contents to represent an independent implementation of VRP
-- Use repository contents as evidence of ownership of VRP concepts, documentation, validation artifacts, or associated intellectual property
+- Claim authorship of repository contents
+- Represent repository contents as your own work
+- Represent repository contents as an official implementation of VRP
+- Use repository contents as evidence of ownership of VRP concepts, validation artifacts, or associated intellectual property
 
-No Transfer Of Intellectual Property
+Intellectual Property
 
 Access to this repository does not transfer ownership of:
 
@@ -44,9 +43,10 @@ This repository is provided for evaluation purposes only and is provided "as is"
 
 Acceptance
 
-By cloning, downloading, building, or executing the repository contents, the user acknowledges this evaluation license.
+By cloning, downloading, building, or executing repository contents, the user acknowledges this evaluation license.
 
 Author
 
 Vitalijus Riabovas
+
 VRP — Veil Routing Protocol
