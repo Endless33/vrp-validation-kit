@@ -1,3 +1,19 @@
+VRP External Validation Kit v1.0
+
+A standalone validation environment focused on observable runtime behavior rather than implementation details.
+
+---
+
+Repository
+
+https://github.com/Endless33/vrp-validation-kit
+
+Official Release
+
+https://github.com/Endless33/vrp-validation-kit/releases/tag/v1.0.0
+
+---
+
 Quick Evaluation
 
 Clone the repository:
@@ -46,8 +62,6 @@ FINAL_VERDICT=ATTACK_SUITE_PASSED
 
 What The Attack Suite Tests
 
-The attack suite attempts to violate observable runtime invariants through reproducible scenarios.
-
 Current attack scenarios:
 
 - Replay Storm
@@ -61,14 +75,41 @@ Current attack scenarios:
 
 Expected verdicts:
 
-REPLAY_WINDOW_ENFORCED
-DUPLICATE_COMMIT_REJECTED
-AUTHORITY_ROLLBACK_REJECTED
-STALE_EPOCH_REJECTED
-AUTHORITY_RACE_RESOLVED
-TRANSPORT_MIGRATION_PRESERVED
-SESSION_RECOVERY_PRESERVED
-CANONICAL_HISTORY_REWRITE_REJECTED
+- REPLAY_WINDOW_ENFORCED
+- DUPLICATE_COMMIT_REJECTED
+- AUTHORITY_ROLLBACK_REJECTED
+- STALE_EPOCH_REJECTED
+- AUTHORITY_RACE_RESOLVED
+- TRANSPORT_MIGRATION_PRESERVED
+- SESSION_RECOVERY_PRESERVED
+- CANONICAL_HISTORY_REWRITE_REJECTED
+
+---
+
+Validation Coverage
+
+Current validation coverage includes:
+
+- Replay containment
+- Duplicate commit rejection
+- Authority rollback rejection
+- Epoch rollback rejection
+- Authority race resolution
+- Runtime recovery preservation
+- Transport migration preservation
+- Canonical history protection
+
+---
+
+Tested Environments
+
+Validation has been reproduced on:
+
+- Windows 11
+- Oracle Linux
+- Android Termux
+
+The same observable verdicts were produced across all tested environments.
 
 ---
 
@@ -95,7 +136,7 @@ What Is Included
 
 - Validation harness
 - Runtime scenario
-- Attack suite
+- External attack suite
 - Validation documentation
 - Failure models
 - Invariant mappings
@@ -115,3 +156,20 @@ This repository does not contain:
 - Protected implementation mechanisms
 
 The purpose of this repository is validation of observable behavior rather than disclosure of implementation details.
+
+---
+
+Reporting Issues
+
+Use the official v1.0.0 release when evaluating results.
+
+If you modify the code, include the diff.
+
+If the unmodified release fails, provide:
+
+- exact command
+- output
+- environment
+- commit hash
+
+Independent criticism is more valuable than agreement.
