@@ -1,3 +1,13 @@
+License
+
+This repository is distributed under the VRP Validation Kit Evaluation License.
+
+See:
+
+EVALUATION_LICENSE.md
+
+---
+
 # VRP Pilot Documentation
 
 This section contains documentation intended for organizations evaluating VRP in pilot environments.
