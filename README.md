@@ -202,3 +202,26 @@ If the unmodified release fails, provide:
 - commit hash
 
 Independent criticism is more valuable than agreement.
+
+---
+
+## Challenge The Model
+
+The purpose of this repository is not passive observation.
+
+Run it.
+
+Inspect it.
+
+Challenge it.
+
+If you believe a validation path is incorrect, open an issue and provide:
+
+- environment
+- result observed
+- failure cases attempted
+- verdict observed
+- expected behavior
+- actual behavior
+
+Evidence-backed criticism is more valuable than agreement.
