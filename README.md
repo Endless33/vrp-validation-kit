@@ -225,3 +225,29 @@ If you believe a validation path is incorrect, open an issue and provide:
 - actual behavior
 
 Evidence-backed criticism is more valuable than agreement.
+
+---
+
+# VRP Public Validation Kit
+
+This repository provides everything required for a public engineering evaluation of VRP.
+
+## Resources
+
+- Public Pilot Deployment Guide
+- Validation Kit
+- Example Adapter
+- Evidence Reports
+- Pilot Application
+
+## Documentation
+
+➡️ See: `docs/PUBLIC_PILOT_DEPLOYMENT_GUIDE.md`
+
+## Pilot Application
+
+https://tally.so/r/ZjQLN0
+
+## Contact
+
+jumpingvpn@proton.me
