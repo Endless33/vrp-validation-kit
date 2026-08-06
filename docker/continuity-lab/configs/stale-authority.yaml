@@ -1,0 +1,182 @@
+schema_version: "vrp-continuity-lab/scenario-v1"
+
+scenario:
+  id: "stale-authority"
+  title: "Stale Authority Rejection"
+  category: "admission-rejection"
+  description: >-
+    Evaluate whether an opaque stale-authority stimulus is rejected at the
+    public black-box boundary without creating an accepted mutation or
+    terminating otherwise healthy workload progress.
+  public_claim: >-
+    A stale authority attempt must not replace the accepted authority,
+    create an accepted mutation, or destroy the active public continuity
+    reference.
+
+execution:
+  duration_seconds: 55
+  infrastructure_ready_timeout_seconds: 30
+  subject_ready_timeout_seconds: 20
+  stimulus_delivery_timeout_seconds: 10
+  completion_grace_seconds: 15
+  timeline_origin: "subject-ready"
+  clock_source: "host-monotonic"
+
+topology:
+  profile: "dual-path-single-origin-v1"
+  logical_paths:
+    - id: "wifi"
+      role: "primary"
+      initial_state: "enabled"
+    - id: "mobile"
+      role: "alternate"
+      initial_state: "enabled"
+  control_plane_visible_to_subject: false
+  scenario_schedule_visible_to_subject: false
+  host_ports_published: false
+
+preconditions:
+  - id: "origin-reachable"
+    check: "origin.reachable"
+    target: "origin"
+    required: true
+
+  - id: "wifi-path-reachable"
+    check: "path.reachable"
+    target: "wifi"
+    required: true
+
+  - id: "mobile-path-reachable"
+    check: "path.reachable"
+    target: "mobile"
+    required: true
+
+  - id: "subject-ready"
+    check: "subject.health"
+    target: "subject"
+    required: true
+
+stimulus:
+  kind: "stale-authority"
+  construction: "subject-local-opaque"
+  delivery_boundary: "public-adapter-command-v1"
+  harness_visibility: "metadata-only"
+  protected_payload_exported: false
+  protected_payload_logged: false
+
+stimulus_schedule:
+  - event_id: "stale-authority-001"
+    at_seconds: 15
+    action: "subject.stimulus"
+    target: "subject"
+    kind: "stale-authority"
+    witness_required: true
+    expected_public_verdict: "rejected-stale-authority"
+    description: >-
+      Request delivery of one opaque stale-authority stimulus through the
+      authorized public adapter boundary.
+
+observation_windows:
+  baseline:
+    begins_at: "subject-ready"
+    ends_at: "stale-authority-001"
+    minimum_successful_progress_events: 5
+
+  rejection:
+    begins_at: "stale-authority-001"
+    verdict_timeout_seconds: 10
+    required_rejection_events: 1
+    maximum_accepted_mutations_for_stimulus: 0
+
+  post_rejection:
+    begins_after: "stale-authority-001"
+    ends_at: "run-complete"
+    minimum_successful_progress_events: 5
+    maximum_unplanned_path_transitions: 0
+
+acceptance:
+  contract: "../../expected/invariant-contract.json"
+
+  required_invariants:
+    - "VRP-LAB-EVIDENCE-COMPLETE"
+    - "VRP-LAB-RUN-ID-CONSISTENT"
+    - "VRP-LAB-EVENT-SEQUENCE-MONOTONIC"
+    - "VRP-LAB-EVENT-ID-UNIQUE"
+    - "VRP-LAB-CONTINUITY-REFERENCE-STABLE"
+    - "VRP-LAB-STALE-AUTHORITY-REJECTED"
+    - "VRP-LAB-REJECTED-STIMULUS-NO-MUTATION"
+    - "VRP-LAB-PROGRESS-PRESERVED"
+    - "VRP-LAB-NO-DUPLICATE-ACCEPTANCE"
+
+  parameters:
+    stimulus_event_id: "stale-authority-001"
+    expected_public_verdict: "rejected-stale-authority"
+    required_rejection_events: 1
+    maximum_accepted_mutations_for_stimulus: 0
+    minimum_baseline_progress_events: 5
+    minimum_post_rejection_progress_events: 5
+    maximum_continuity_reference_count: 1
+    maximum_unplanned_path_transitions: 0
+    maximum_duplicate_accepted_mutations: 0
+
+evidence:
+  format: "public-evidence-v1"
+
+  required_subject_artifacts:
+    - "subject-evidence.json"
+    - "subject-events.jsonl"
+
+  required_subject_event_fields:
+    - "run_id"
+    - "event_sequence"
+    - "event_id"
+    - "event_kind"
+    - "related_witness_event_id"
+    - "public_verdict"
+    - "observed_at_utc"
+
+  required_witness_events:
+    - "infrastructure.ready"
+    - "subject.ready"
+    - "stimulus.stale-authority.requested"
+    - "stimulus.stale-authority.delivered"
+    - "subject.completed"
+    - "run.completed"
+
+  prohibited_content:
+    raw_authority_artifacts: true
+    protected_authority_tokens: true
+    private_authority_state: true
+    internal_comparison_parameters: true
+    cryptographic_keys: true
+    credentials: true
+    raw_protected_packets: true
+    internal_runtime_state: true
+    proprietary_decision_traces: true
+    source_code_paths: true
+
+verdict_policy:
+  fail_closed: true
+  missing_required_evidence: "INCOMPLETE"
+  stimulus_not_delivered: "INCOMPLETE"
+  infrastructure_failure: "INCOMPLETE"
+  unexpected_harness_error: "INCOMPLETE"
+  missing_public_rejection_verdict: "FAIL"
+  accepted_mutation_linked_to_stimulus: "FAIL"
+  contradicted_invariant: "FAIL"
+  subject_failure_with_healthy_infrastructure: "FAIL"
+  all_required_invariants_satisfied: "PASS"
+
+limitations:
+  - >-
+    The harness records stimulus metadata but does not receive or inspect
+    protected authority material.
+  - >-
+    The scenario verifies behavior exposed by the authorized black-box
+    adapter and does not disclose the internal rejection mechanism.
+  - >-
+    A PASS result applies only to the supplied image, scenario snapshot,
+    invariant contract, and recorded execution environment.
+  - >-
+    The result is not a formal proof of every possible stale-authority
+    condition.
