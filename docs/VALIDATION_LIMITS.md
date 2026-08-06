@@ -22,11 +22,15 @@ The Validation Kit is intended to verify observable engineering properties, incl
 - deterministic recovery
 - replay protection
 - evidence integrity
-- signed evidence verification
+- evidence hash verification
 - validation reproducibility
 - failure handling
 - recovery sequencing
 - protocol invariants exposed through the public validation interface
+
+The current public verifier checks evidence structure and hash integrity. It does not claim signer authenticity.
+
+Any future signed-evidence verifier must use an independently supplied trust anchor rather than trusting a public key contained only in the evidence bundle.
 
 Each published validation result should be reproducible by an independent evaluator following the documented validation procedure.
 
