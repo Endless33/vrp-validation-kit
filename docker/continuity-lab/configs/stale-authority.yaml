@@ -95,7 +95,7 @@ observation_windows:
     maximum_unplanned_path_transitions: 0
 
 acceptance:
-  contract: "../../expected/invariant-contract.json"
+  contract: "../expected/invariant-contract.json"
 
   required_invariants:
     - "VRP-LAB-EVIDENCE-COMPLETE"

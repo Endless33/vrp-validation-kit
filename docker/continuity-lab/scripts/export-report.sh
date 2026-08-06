@@ -545,11 +545,11 @@ VERIFIED_CONTRACT_SHA256="$(
         "verification.json"
 )"
 
-[[ "${CURRENT_MANIFEST_SHA256}" ==
+[[ "${CURRENT_MANIFEST_SHA256}" == \
     "${VERIFIED_MANIFEST_SHA256}" ]] ||
     die "Manifest changed after verification"
 
-[[ "${CURRENT_CONTRACT_SHA256}" ==
+[[ "${CURRENT_CONTRACT_SHA256}" == \
     "${VERIFIED_CONTRACT_SHA256}" ]] ||
     die "Invariant contract changed after verification"
 

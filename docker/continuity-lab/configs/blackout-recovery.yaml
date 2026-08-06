@@ -99,7 +99,7 @@ observation_windows:
     expected_active_path: "mobile"
 
 acceptance:
-  contract: "../../expected/invariant-contract.json"
+  contract: "../expected/invariant-contract.json"
 
   required_invariants:
     - "VRP-LAB-EVIDENCE-COMPLETE"
