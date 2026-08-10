@@ -189,8 +189,7 @@ compose() {
 }
 
 controller_call() {
-    timeout 20s \
-        "${COMPOSE_BASE[@]}" \
+    "${COMPOSE_BASE[@]}" \
         --profile tools \
         run \
         --rm \
@@ -198,6 +197,10 @@ controller_call() {
         -T \
         controller \
         "$@"
+
+    rc=$?
+    echo "[controller_call] exit=$rc" >&2
+    return $rc
 }
 
 record_event() {
@@ -405,7 +408,11 @@ on_exit() {
         FINALIZED=1
     fi
 
-    cleanup_lab
+    if [[ "${VRP_LAB_DEBUG_KEEP_CONTAINERS:-0}" != "1" ]]; then
+        cleanup_lab
+    else
+        warn "Debug mode enabled: keeping Docker containers running"
+    fi
 
     if ((exit_status != 0)); then
         printf '[vrp-lab] RUN_STATE=INCOMPLETE\n' >&2
@@ -421,8 +428,7 @@ wait_for_fault_engine() {
 
     until controller_call \
         --max-time 3 \
-        "http://fault-engine:8474/version" \
-        >/dev/null 2>&1; do
+        "http://fault-engine:8474/version"; do
         ((SECONDS < deadline)) ||
             die "Fault-engine control API did not become ready"
 
@@ -759,9 +765,7 @@ docker compose version >/dev/null 2>&1 ||
 
 readonly CONFIG_PATH="$(resolve_config_path "$1")"
 
-export VRP_LAB_YQ_IMAGE="${
-    VRP_LAB_YQ_IMAGE:-mikefarah/yq:4.45.1
-}"
+export VRP_LAB_YQ_IMAGE="${VRP_LAB_YQ_IMAGE:-mikefarah/yq:4.45.1}"
 
 validate_image_reference "${VRP_LAB_YQ_IMAGE}"
 ensure_image "${VRP_LAB_YQ_IMAGE}"
@@ -839,27 +843,13 @@ validate_integer_range \
     die "Invariant-contract symlinks are not permitted"
 
 export VRP_LAB_SUBJECT_IMAGE="${VRP_LAB_SUBJECT_IMAGE:-}"
-export VRP_LAB_ORIGIN_IMAGE="${
-    VRP_LAB_ORIGIN_IMAGE:-hashicorp/http-echo:1.0.0
-}"
-export VRP_LAB_FAULT_ENGINE_IMAGE="${
-    VRP_LAB_FAULT_ENGINE_IMAGE:-ghcr.io/shopify/toxiproxy:2.12.0
-}"
-export VRP_LAB_RELAY_IMAGE="${
-    VRP_LAB_RELAY_IMAGE:-alpine/socat:1.8.0.0
-}"
-export VRP_LAB_CONTROLLER_IMAGE="${
-    VRP_LAB_CONTROLLER_IMAGE:-curlimages/curl:8.12.1
-}"
-export VRP_LAB_SUBJECT_ENTRYPOINT="${
-    VRP_LAB_SUBJECT_ENTRYPOINT:-/vrp-lab-adapter
-}"
-export VRP_LAB_SUBJECT_UID="${
-    VRP_LAB_SUBJECT_UID:-$(id -u)
-}"
-export VRP_LAB_SUBJECT_GID="${
-    VRP_LAB_SUBJECT_GID:-$(id -g)
-}"
+export VRP_LAB_ORIGIN_IMAGE="${VRP_LAB_ORIGIN_IMAGE:-hashicorp/http-echo:1.0.0}"
+export VRP_LAB_FAULT_ENGINE_IMAGE="${VRP_LAB_FAULT_ENGINE_IMAGE:-ghcr.io/shopify/toxiproxy:2.12.0}"
+export VRP_LAB_RELAY_IMAGE="${VRP_LAB_RELAY_IMAGE:-alpine/socat:1.8.0.0}"
+export VRP_LAB_CONTROLLER_IMAGE="${VRP_LAB_CONTROLLER_IMAGE:-curlimages/curl:8.12.1}"
+export VRP_LAB_SUBJECT_ENTRYPOINT="${VRP_LAB_SUBJECT_ENTRYPOINT:-/vrp-lab-adapter}"
+export VRP_LAB_SUBJECT_UID="${VRP_LAB_SUBJECT_UID:-$(id -u)}"
+export VRP_LAB_SUBJECT_GID="${VRP_LAB_SUBJECT_GID:-$(id -g)}"
 
 for image_reference in \
     "${VRP_LAB_SUBJECT_IMAGE}" \
@@ -1032,11 +1022,7 @@ for ((event_index = 0; event_index < EVENT_COUNT; event_index++)); do
 done
 
 export VRP_LAB_RUN_ID="${RUN_ID}"
-export VRP_LAB_RUN_DURATION_SECONDS="$(
-    (
-        DURATION_SECONDS + SUBJECT_READY_TIMEOUT_SECONDS
-    )
-)"
+export VRP_LAB_RUN_DURATION_SECONDS="$((DURATION_SECONDS + SUBJECT_READY_TIMEOUT_SECONDS))"
 export VRP_LAB_SUBJECT_OUTPUT_DIR="${RUN_DIR}/subject"
 
 COMPOSE_BASE=(
@@ -1120,11 +1106,7 @@ compose \
     subject \
     >/dev/null
 
-SUBJECT_READY_DEADLINE=$(
-    (
-        SECONDS + SUBJECT_READY_TIMEOUT_SECONDS
-    )
-)
+SUBJECT_READY_DEADLINE=$((SECONDS + SUBJECT_READY_TIMEOUT_SECONDS))
 
 while :; do
     SUBJECT_CID="$(
