@@ -240,6 +240,7 @@ fi
 
 for required_command in \
     docker \
+    timeout \
     realpath \
     sha256sum \
     awk \
@@ -250,8 +251,17 @@ for required_command in \
     require_command "${required_command}"
 done
 
-docker info >/dev/null 2>&1 ||
-    die "Docker daemon is not available"
+set +e
+
+timeout     --signal=TERM     --kill-after=2s     5s     docker version     --format '{{.Server.Version}}'     >/dev/null 2>&1
+
+docker_preflight_rc=$?
+
+set -e
+
+if ((docker_preflight_rc != 0)); then
+    die "Docker daemon is not available or did not respond within the bounded preflight"
+fi
 
 if [[ ! -d "$1" ]]; then
     die "Run directory does not exist"
@@ -294,12 +304,8 @@ if [[ -e "${VERIFICATION_OUTPUT}" &&
     die "verification.json already exists; set VRP_LAB_OVERWRITE_VERIFICATION=1 to replace it"
 fi
 
-export VRP_LAB_JQ_IMAGE="${
-    VRP_LAB_JQ_IMAGE:-ghcr.io/jqlang/jq:1.7.1
-}"
-export VRP_LAB_YQ_IMAGE="${
-    VRP_LAB_YQ_IMAGE:-mikefarah/yq:4.45.1
-}"
+export VRP_LAB_JQ_IMAGE="${VRP_LAB_JQ_IMAGE:-ghcr.io/jqlang/jq:1.7.1}"
+export VRP_LAB_YQ_IMAGE="${VRP_LAB_YQ_IMAGE:-mikefarah/yq:4.45.1}"
 
 validate_image_reference "${VRP_LAB_JQ_IMAGE}"
 validate_image_reference "${VRP_LAB_YQ_IMAGE}"
@@ -382,10 +388,17 @@ if ! jq_container \
         "subject/subject-events.jsonl is not valid non-empty JSONL"
 fi
 
-if ! yq_scenario_to_json >"${SCENARIO_JSON_TEMP}"; then
+set +e
+yq_scenario_to_json >"${SCENARIO_JSON_TEMP}"
+scenario_conversion_rc=$?
+set -e
+
+if ((scenario_conversion_rc != 0)); then
     write_incomplete_result \
         "input/scenario.yaml could not be parsed"
 fi
+
+chmod 0644 "${SCENARIO_JSON_TEMP}"
 
 if ! jq_container \
     -e \
@@ -1076,29 +1089,19 @@ def scenario_checks(
     | unique
   ) as $prohibited_keys
 | (
-    $subject_object.summary.successful_progress_event_count
-      | nonnegative_integer
-  )
-  and (
-    $subject_object.summary.path_transition_count
-      | nonnegative_integer
-  )
-  and (
-    $subject_object.summary.accepted_mutation_count
-      | nonnegative_integer
-  )
-  and (
-    $subject_object.summary.duplicate_accepted_mutation_count
-      | nonnegative_integer
-  )
-  and (
-    $subject_object.summary.stale_authority_rejection_count
-      | nonnegative_integer
-  )
-  and (
-    $subject_object.summary.replay_rejection_count
-      | nonnegative_integer
-  ) as $counter_fields_valid
+    ($subject_object.summary.successful_progress_event_count
+        | nonnegative_integer)
+    and ($subject_object.summary.path_transition_count
+        | nonnegative_integer)
+    and ($subject_object.summary.accepted_mutation_count
+        | nonnegative_integer)
+    and ($subject_object.summary.duplicate_accepted_mutation_count
+        | nonnegative_integer)
+    and ($subject_object.summary.stale_authority_rejection_count
+        | nonnegative_integer)
+    and ($subject_object.summary.replay_rejection_count
+        | nonnegative_integer)
+) as $counter_fields_valid
 | (
     $counter_fields_valid
     and $subject_object.summary.successful_progress_event_count
@@ -1115,46 +1118,40 @@ def scenario_checks(
       == ($replay_rejection_events | length)
   ) as $counter_consistency
 | (
-    $manifest_object.schema_version
-      == "vrp-continuity-lab/run-manifest-v1"
-    and $scenario_object.schema_version
-      == "vrp-continuity-lab/scenario-v1"
-    and $contract_object.schema_version
-      == "vrp-continuity-lab/invariant-contract-v1"
-    and $environment_object.schema_version
-      == "vrp-continuity-lab/environment-v1"
-    and $subject_object.schema_version
-      == "vrp-continuity-lab/subject-evidence-v1"
-    and $subject_object.evidence_format == "public-evidence-v1"
-    and $subject_object.run_id
-      | nonempty_string
-    and $subject_object.adapter.public_id
-      | nonempty_string
-    and $subject_object.adapter.version
-      | nonempty_string
-    and $subject_object.started_at_utc
-      | valid_utc
-    and $subject_object.completed_at_utc
-      | valid_utc
-    and $subject_object.continuity_reference
-      | nonempty_string
-    and $subject_object.final_active_path
-      | nonempty_string
+    ($manifest_object.schema_version
+        == "vrp-continuity-lab/run-manifest-v1")
+    and ($scenario_object.schema_version
+        == "vrp-continuity-lab/scenario-v1")
+    and ($contract_object.schema_version
+        == "vrp-continuity-lab/invariant-contract-v1")
+    and ($environment_object.schema_version
+        == "vrp-continuity-lab/environment-v1")
+    and ($subject_object.schema_version
+        == "vrp-continuity-lab/subject-evidence-v1")
+    and ($subject_object.evidence_format
+        == "public-evidence-v1")
+    and ($subject_object.run_id | nonempty_string)
+    and ($subject_object.adapter.public_id | nonempty_string)
+    and ($subject_object.adapter.version | nonempty_string)
+    and ($subject_object.started_at_utc | valid_utc)
+    and ($subject_object.completed_at_utc | valid_utc)
+    and ($subject_object.continuity_reference | nonempty_string)
+    and ($subject_object.final_active_path | nonempty_string)
     and all(
-      $witness_events[];
-      .schema_version == "vrp-continuity-lab/witness-event-v1"
-      and (.observed_at_utc | valid_utc)
+        $witness_events[];
+        (.schema_version == "vrp-continuity-lab/witness-event-v1")
+        and (.observed_at_utc | valid_utc)
     )
     and all(
-      $events[];
-      .schema_version == "vrp-continuity-lab/subject-event-v1"
-      and (.run_id | nonempty_string)
-      and (.event_id | nonempty_string)
-      and (.event_kind | nonempty_string)
-      and (.public_verdict | nonempty_string)
-      and (.observed_at_utc | valid_utc)
+        $events[];
+        (.schema_version == "vrp-continuity-lab/subject-event-v1")
+        and (.run_id | nonempty_string)
+        and (.event_id | nonempty_string)
+        and (.event_kind | nonempty_string)
+        and (.public_verdict | nonempty_string)
+        and (.observed_at_utc | valid_utc)
     )
-  ) as $schema_compatible
+) as $schema_compatible
 | (
     all(
       ($scenario_object.evidence.required_witness_events // [])[];
@@ -1175,8 +1172,8 @@ def scenario_checks(
     | all(. == $manifest_object.run_id)
   ) as $run_ids_consistent
 | (
-    $continuity_references | length
-  ) == 1 as $continuity_stable
+    ($continuity_references | length) == 1
+  ) as $continuity_stable
 | (
     $subject_object.summary.duplicate_accepted_mutation_count == 0
     and ($duplicate_events | length) == 0
@@ -1451,6 +1448,8 @@ def scenario_checks(
   }
 JQ
 
+chmod 0644 "${VERIFIER_PROGRAM_TEMP}"
+
 if ! jq_container \
     -n \
     --slurpfile manifest /evidence/manifest.json \
@@ -1476,6 +1475,11 @@ if ! jq_container \
     write_incomplete_result \
         "The deterministic public-invariant evaluator did not complete"
 fi
+
+chmod 0644 "${OUTPUT_TEMP}"
+
+cp -- "${OUTPUT_TEMP}" "${RUN_DIR}/report/verifier-raw-result.json"
+chmod 0644 "${RUN_DIR}/report/verifier-raw-result.json"
 
 if ! jq_container \
     -e \

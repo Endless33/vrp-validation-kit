@@ -1124,15 +1124,25 @@ while :; do
             die "Subject exited before becoming ready"
         fi
 
-        if timeout 5s \
-            "${COMPOSE_BASE[@]}" \
-            --profile subject \
-            exec \
-            -T \
-            subject \
+        set +e
+
+        timeout \
+            --signal=TERM \
+            --kill-after=2s \
+            5s \
+            docker exec \
+            "${SUBJECT_CID}" \
             "${VRP_LAB_SUBJECT_ENTRYPOINT}" \
-            health \
-            >/dev/null 2>&1; then
+            health
+
+        rc=$?
+
+        set -e
+
+        echo "[subject_health] exit=${rc}" >&2
+
+        if (( rc == 0 )); then
+            echo "[subject_health] READY" >&2
             break
         fi
     fi
