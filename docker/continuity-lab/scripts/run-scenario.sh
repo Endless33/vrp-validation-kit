@@ -1161,13 +1161,35 @@ record_event \
     "subject" \
     "confirmed"
 
-while IFS='|' read -r \
-    EVENT_OFFSET \
-    EVENT_ID \
-    EVENT_ACTION \
-    EVENT_TARGET \
-    EVENT_TARGETS \
-    EVENT_KIND; do
+exec 9<"${RUN_DIR}/input/schedule.tsv"
+
+while IFS= read -r SCHEDULE_LINE <&9 || [[ -n "${SCHEDULE_LINE}" ]]; do
+    [[ -n "${SCHEDULE_LINE}" ]] || continue
+
+    EVENT_OFFSET=""
+    EVENT_ID=""
+    EVENT_ACTION=""
+    EVENT_TARGET=""
+    EVENT_TARGETS=""
+    EVENT_KIND=""
+
+    IFS='|' read -r \
+        EVENT_OFFSET \
+        EVENT_ID \
+        EVENT_ACTION \
+        EVENT_TARGET \
+        EVENT_TARGETS \
+        EVENT_KIND \
+        <<<"${SCHEDULE_LINE}"
+
+    [[ -n "${EVENT_OFFSET}" ]] ||
+        die "Scheduled event has no timeline offset"
+
+    [[ -n "${EVENT_ID}" ]] ||
+        die "Scheduled event has no event identifier"
+
+    [[ -n "${EVENT_ACTION}" ]] ||
+        die "Scheduled event has no action"
 
     wait_until_timeline_offset "${EVENT_OFFSET}"
 
@@ -1177,7 +1199,9 @@ while IFS='|' read -r \
         "${EVENT_TARGET}" \
         "${EVENT_TARGETS}" \
         "${EVENT_KIND}"
-done <"${RUN_DIR}/input/schedule.tsv"
+done
+
+exec 9<&-
 
 wait_until_timeline_offset "${DURATION_SECONDS}"
 
