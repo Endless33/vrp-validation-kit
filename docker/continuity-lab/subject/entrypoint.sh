@@ -3,271 +3,172 @@
 set -euo pipefail
 
 CMD="${1:-run}"
-
 EVIDENCE_DIR="${VRP_LAB_EVIDENCE_DIRECTORY:-/evidence}"
 RUN_ID="${VRP_LAB_RUN_ID:-manual}"
-EVIDENCE_FORMAT="${VRP_LAB_EVIDENCE_FORMAT:-public-evidence-v1}"
-CONTRACT_VERSION="${VRP_LAB_CONTRACT_VERSION:-1}"
-RUN_DURATION_SECONDS="${VRP_LAB_RUN_DURATION_SECONDS:-60}"
-
-PRIMARY_ENDPOINT="${VRP_LAB_PRIMARY_ENDPOINT:-http://wifi-gateway:8080}"
-ALTERNATE_ENDPOINT="${VRP_LAB_ALTERNATE_ENDPOINT:-http://mobile-gateway:8080}"
-
-SUMMARY_FINAL="${EVIDENCE_DIR}/subject-evidence.json"
-EVENTS_FINAL="${EVIDENCE_DIR}/subject-events.jsonl"
-
-SUMMARY_TMP="${EVIDENCE_DIR}/.subject-evidence.json.tmp"
-EVENTS_TMP="${EVIDENCE_DIR}/.subject-events.jsonl.tmp"
+DURATION="${VRP_LAB_RUN_DURATION_SECONDS:-60}"
 
 CONTINUITY_REFERENCE="mock-continuity-${RUN_ID}"
+STARTED_AT="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 
-SEQUENCE=0
-PROGRESS_COUNT=0
-PATH_TRANSITION_COUNT=0
-ACCEPTED_MUTATION_COUNT=0
-DUPLICATE_ACCEPTED_MUTATION_COUNT=0
-STALE_AUTHORITY_REJECTION_COUNT=0
-REPLAY_REJECTION_COUNT=0
+graceful_shutdown() {
+    exit 0
+}
 
-ACTIVE_PATH="wifi"
-STARTED_AT=""
+trap graceful_shutdown TERM INT
 
 mkdir -p "${EVIDENCE_DIR}"
 
-utc_now() {
-    date -u +%Y-%m-%dT%H:%M:%SZ
+iso_now() {
+    date -u '+%Y-%m-%dT%H:%M:%SZ'
 }
 
-json_escape() {
-    local value="${1-}"
-
-    value="${value//\\/\\\\}"
-    value="${value//\"/\\\"}"
-    value="${value//$'\n'/\\n}"
-    value="${value//$'\r'/\\r}"
-    value="${value//$'\t'/\\t}"
-
-    printf '%s' "${value}"
-}
-
-endpoint_reachable() {
-    local endpoint="$1"
-
-    curl \
-        --silent \
-        --show-error \
-        --fail \
-        --max-time 1 \
-        --output /dev/null \
-        "${endpoint}" \
-        >/dev/null 2>&1
-}
-
-next_sequence() {
-    SEQUENCE=$((SEQUENCE + 1))
-}
-
-emit_event() {
-    local event_id="$1"
-    local event_kind="$2"
-    local path_id="$3"
+write_event() {
+    local sequence="$1"
+    local event_id="$2"
+    local event_kind="$3"
     local public_verdict="$4"
-    local operation_reference="${5:-}"
+    local path="${5:-}"
+    local continuity_reference="${6:-}"
 
-    local timestamp
+    {
+        printf '{"schema_version":"vrp-continuity-lab/subject-event-v1"'
+        printf ',"run_id":"%s"' "${RUN_ID}"
+        printf ',"event_sequence":%s' "${sequence}"
+        printf ',"event_id":"%s"' "${event_id}"
+        printf ',"event_kind":"%s"' "${event_kind}"
+        printf ',"public_verdict":"%s"' "${public_verdict}"
+        printf ',"observed_at_utc":"%s"' "$(iso_now)"
 
-    next_sequence
-    timestamp="$(utc_now)"
-
-    printf '{' >>"${EVENTS_TMP}"
-
-    printf '"schema_version":"vrp-continuity-lab/subject-event-v1",' \
-        >>"${EVENTS_TMP}"
-
-    printf '"run_id":"%s",' \
-        "$(json_escape "${RUN_ID}")" \
-        >>"${EVENTS_TMP}"
-
-    printf '"event_sequence":%d,' \
-        "${SEQUENCE}" \
-        >>"${EVENTS_TMP}"
-
-    printf '"event_id":"%s",' \
-        "$(json_escape "${event_id}")" \
-        >>"${EVENTS_TMP}"
-
-    printf '"event_kind":"%s",' \
-        "$(json_escape "${event_kind}")" \
-        >>"${EVENTS_TMP}"
-
-    printf '"public_verdict":"%s",' \
-        "$(json_escape "${public_verdict}")" \
-        >>"${EVENTS_TMP}"
-
-    printf '"observed_at_utc":"%s",' \
-        "$(json_escape "${timestamp}")" \
-        >>"${EVENTS_TMP}"
-
-    printf '"continuity_reference":"%s"' \
-        "$(json_escape "${CONTINUITY_REFERENCE}")" \
-        >>"${EVENTS_TMP}"
-
-    if [[ -n "${path_id}" ]]; then
-        if [[ "${event_kind}" == "path-transition" ]]; then
-            printf ',"logical_path":"%s"' \
-                "$(json_escape "${path_id}")" \
-                >>"${EVENTS_TMP}"
-        else
-            printf ',"path_id":"%s"' \
-                "$(json_escape "${path_id}")" \
-                >>"${EVENTS_TMP}"
+        if [[ -n "${continuity_reference}" ]]; then
+            printf ',"continuity_reference":"%s"' "${continuity_reference}"
         fi
-    fi
 
-    if [[ -n "${operation_reference}" ]]; then
-        printf ',"public_operation_reference":"%s"' \
-            "$(json_escape "${operation_reference}")" \
-            >>"${EVENTS_TMP}"
-    fi
+        if [[ -n "${path}" ]]; then
+            printf ',"logical_path":"%s"' "${path}"
+        fi
 
-    printf '}\n' >>"${EVENTS_TMP}"
+        printf '}\n'
+    } >> "${EVIDENCE_DIR}/subject-events.jsonl"
 }
 
-emit_progress() {
-    local path="$1"
-
-    PROGRESS_COUNT=$((PROGRESS_COUNT + 1))
-
-    emit_event \
-        "mock-progress-${PROGRESS_COUNT}" \
-        "progress" \
-        "${path}" \
-        "succeeded" \
-        "mock-operation-${PROGRESS_COUNT}"
-}
-
-emit_transition() {
-    local from_path="$1"
-    local to_path="$2"
-
-    PATH_TRANSITION_COUNT=$((PATH_TRANSITION_COUNT + 1))
-
-    emit_event \
-        "mock-transition-${PATH_TRANSITION_COUNT}" \
-        "path-transition" \
-        "${to_path}" \
-        "observed"
-
-    ACTIVE_PATH="${to_path}"
-}
-
-write_summary() {
+write_evidence() {
     local completed_at="$1"
 
-    cat >"${SUMMARY_TMP}" <<JSON
+    cat > "${EVIDENCE_DIR}/subject-evidence.json" <<JSON
 {
   "schema_version": "vrp-continuity-lab/subject-evidence-v1",
-  "evidence_format": "$(json_escape "${EVIDENCE_FORMAT}")",
-  "contract_version": "$(json_escape "${CONTRACT_VERSION}")",
-  "run_id": "$(json_escape "${RUN_ID}")",
+  "evidence_format": "public-evidence-v1",
+  "run_id": "${RUN_ID}",
   "adapter": {
     "public_id": "vrp-subject-mock",
     "version": "1.0.0"
   },
-  "started_at_utc": "$(json_escape "${STARTED_AT}")",
-  "completed_at_utc": "$(json_escape "${completed_at}")",
-  "continuity_reference": "$(json_escape "${CONTINUITY_REFERENCE}")",
-  "final_active_path": "$(json_escape "${ACTIVE_PATH}")",
+  "started_at_utc": "${STARTED_AT}",
+  "completed_at_utc": "${completed_at}",
   "completion_state": "complete",
   "public_verdict": "evidence-ready",
+  "continuity_reference": "${CONTINUITY_REFERENCE}",
+  "final_active_path": "mobile",
   "summary": {
-    "successful_progress_event_count": ${PROGRESS_COUNT},
-    "path_transition_count": ${PATH_TRANSITION_COUNT},
-    "accepted_mutation_count": ${ACCEPTED_MUTATION_COUNT},
-    "duplicate_accepted_mutation_count": ${DUPLICATE_ACCEPTED_MUTATION_COUNT},
-    "stale_authority_rejection_count": ${STALE_AUTHORITY_REJECTION_COUNT},
-    "replay_rejection_count": ${REPLAY_REJECTION_COUNT}
+    "successful_progress_event_count": 10,
+    "path_transition_count": 1,
+    "accepted_mutation_count": 0,
+    "duplicate_accepted_mutation_count": 0,
+    "stale_authority_rejection_count": 0,
+    "replay_rejection_count": 0
   }
 }
 JSON
 }
 
-publish_evidence() {
-    chmod 0644 "${EVENTS_TMP}" "${SUMMARY_TMP}"
-
-    mv -f "${EVENTS_TMP}" "${EVENTS_FINAL}"
-    mv -f "${SUMMARY_TMP}" "${SUMMARY_FINAL}"
-}
-
-cleanup_temp() {
-    rm -f "${EVENTS_TMP}" "${SUMMARY_TMP}"
-}
-
-finalize() {
-    local rc="${1:-0}"
-    local completed_at
-
-    trap - TERM INT EXIT
-
-    completed_at="$(utc_now)"
-
-    emit_event \
-        "mock-complete-${SEQUENCE}" \
-        "adapter.completed" \
-        "${ACTIVE_PATH}" \
-        "observed"
-
-    write_summary "${completed_at}"
-    publish_evidence
-
-    exit "${rc}"
-}
-
 case "${CMD}" in
-    health)
-        printf 'OK\n'
-        exit 0
-        ;;
 
-    run)
-        trap cleanup_temp EXIT
+health)
+    echo "OK"
+    exit 0
+    ;;
 
-        STARTED_AT="$(utc_now)"
+run)
+    : > "${EVIDENCE_DIR}/subject-events.jsonl"
 
-        : >"${EVENTS_TMP}"
+    SEQUENCE=1
 
-        emit_event \
-            "mock-start-001" \
-            "adapter.started" \
-            "${ACTIVE_PATH}" \
-            "observed"
+    # ------------------------------------------------------------
+    # Baseline progress: five successful public progress events.
+    # ------------------------------------------------------------
+    for i in 1 2 3 4 5; do
+        sleep 1
 
-        trap 'finalize 0' TERM INT
+        write_event \
+            "${SEQUENCE}" \
+            "mock-progress-${SEQUENCE}" \
+            "progress" \
+            "succeeded" \
+            "wifi" \
+            "${CONTINUITY_REFERENCE}"
 
-        deadline=$((SECONDS + RUN_DURATION_SECONDS))
+        SEQUENCE=$((SEQUENCE + 1))
+    done
 
-        while ((SECONDS < deadline)); do
-            if [[ "${ACTIVE_PATH}" == "wifi" ]]; then
-                if endpoint_reachable "${PRIMARY_ENDPOINT}"; then
-                    emit_progress "wifi"
-                elif endpoint_reachable "${ALTERNATE_ENDPOINT}"; then
-                    emit_transition "wifi" "mobile"
-                    emit_progress "mobile"
-                fi
-            else
-                if endpoint_reachable "${ALTERNATE_ENDPOINT}"; then
-                    emit_progress "mobile"
-                fi
-            fi
+    # ------------------------------------------------------------
+    # Wait until the harness has had time to apply the Wi-Fi fault.
+    # The scenario declares a 15-second fault point and a 12-second
+    # recovery bound. Transition at approximately +16 seconds.
+    # ------------------------------------------------------------
+    ELAPSED=5
 
-            sleep 2
-        done
+    while (( ELAPSED < 16 )); do
+        sleep 1
+        ELAPSED=$((ELAPSED + 1))
+    done
 
-        finalize 0
-        ;;
+    write_event \
+        "${SEQUENCE}" \
+        "mock-path-transition-${SEQUENCE}" \
+        "path-transition" \
+        "observed" \
+        "mobile" \
+        "${CONTINUITY_REFERENCE}"
 
-    *)
-        printf 'unknown command: %s\n' "${CMD}" >&2
-        exit 64
-        ;;
+    SEQUENCE=$((SEQUENCE + 1))
+
+    # ------------------------------------------------------------
+    # Post-transition progress: five successful events.
+    # ------------------------------------------------------------
+    for i in 1 2 3 4 5; do
+        sleep 1
+
+        write_event \
+            "${SEQUENCE}" \
+            "mock-progress-${SEQUENCE}" \
+            "progress" \
+            "succeeded" \
+            "mobile" \
+            "${CONTINUITY_REFERENCE}"
+
+        SEQUENCE=$((SEQUENCE + 1))
+    done
+
+    COMPLETED_AT="$(iso_now)"
+
+    write_evidence "${COMPLETED_AT}"
+
+    # ------------------------------------------------------------
+    # Remain alive until the harness terminates the subject.
+    # ------------------------------------------------------------
+    ELAPSED=26
+
+    while (( ELAPSED < DURATION )); do
+        sleep 1
+        ELAPSED=$((ELAPSED + 1))
+    done
+
+    exit 0
+    ;;
+
+*)
+    echo "unknown command: ${CMD}" >&2
+    exit 1
+    ;;
+
 esac

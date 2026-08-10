@@ -363,6 +363,7 @@ write_manifest() {
 EOF
 
     mv -- "${temporary}" "${destination}"
+    chmod 0644 -- "${destination}"
 }
 
 cleanup_lab() {

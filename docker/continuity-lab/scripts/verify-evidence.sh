@@ -152,7 +152,7 @@ jq_container() {
         --cap-drop ALL \
         --security-opt no-new-privileges:true \
         --tmpfs /tmp:rw,noexec,nosuid,nodev,size=32m \
-        --mount "type=bind,source=${RUN_DIR},target=/evidence,readonly" \
+        --volume "${RUN_DIR}:/evidence:ro,Z" \
         "${VRP_LAB_JQ_IMAGE}" \
         "$@"
 }
@@ -165,7 +165,7 @@ yq_scenario_to_json() {
         --cap-drop ALL \
         --security-opt no-new-privileges:true \
         --tmpfs /tmp:rw,noexec,nosuid,nodev,size=32m \
-        --mount "type=bind,source=${RUN_DIR}/input/scenario.yaml,target=/input/scenario.yaml,readonly" \
+        --volume "${RUN_DIR}/input/scenario.yaml:/input/scenario.yaml:ro,Z" \
         "${VRP_LAB_YQ_IMAGE}" \
         -o=json \
         '.' \

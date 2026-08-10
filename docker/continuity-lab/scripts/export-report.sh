@@ -150,7 +150,7 @@ jq_container() {
         --cap-drop ALL \
         --security-opt no-new-privileges:true \
         --tmpfs /tmp:rw,noexec,nosuid,nodev,size=32m \
-        --mount "type=bind,source=${RUN_DIR},target=/evidence,readonly" \
+        --volume "${RUN_DIR}:/evidence:ro,Z" \
         "${VRP_LAB_JQ_IMAGE}" \
         "$@"
 }
@@ -414,28 +414,26 @@ MANIFEST_SCENARIO_ID="$(
 if ! jq_container \
     -e \
     '
-      [
-        "VRP-LAB-ARTIFACT-HASHES-MATCH",
-        "VRP-LAB-SCHEMA-COMPATIBLE",
-        "VRP-LAB-PROHIBITED-FIELDS-ABSENT",
-        "VRP-LAB-RUN-ID-CONSISTENT"
-      ] as $required
+      . as $verification
+      | [
+          "VRP-LAB-ARTIFACT-HASHES-MATCH",
+          "VRP-LAB-SCHEMA-COMPATIBLE",
+          "VRP-LAB-PROHIBITED-FIELDS-ABSENT",
+          "VRP-LAB-RUN-ID-CONSISTENT"
+        ] as $required
       | all(
           $required[];
           . as $required_id
           | (
               [
-                .checks[]
+                $verification.checks[]
                 | select(.invariant_id == $required_id)
               ]
-              | length == 1
-              and .[0].status == "PASS"
+              | (length == 1 and .[0].status == "PASS")
             )
         )
-      and (.inputs.hash_mismatches | length == 0)
-    ' \
-    /evidence/verification.json \
-    >/dev/null; then
+      and ($verification.inputs.hash_mismatches | length == 0)
+    ' /evidence/verification.json >/dev/null; then
     die "Verification safety and integrity gates are not all PASS"
 fi
 
