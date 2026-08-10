@@ -309,6 +309,7 @@ write_environment() {
 EOF
 
     mv -- "${temporary}" "${destination}"
+    chmod 0644 -- "${destination}"
 }
 
 write_manifest() {
@@ -1126,19 +1127,17 @@ while :; do
 
         set +e
 
-        timeout \
-            --signal=TERM \
-            --kill-after=2s \
-            5s \
-            docker exec \
-            "${SUBJECT_CID}" \
-            "${VRP_LAB_SUBJECT_ENTRYPOINT}" \
-            health
+        echo "[subject_health] probing ${SUBJECT_CID}" >&2
+
+        output="$(
+            timeout                 --signal=TERM                 --kill-after=1s                 3s                 docker exec                 "${SUBJECT_CID}"                 "${VRP_LAB_SUBJECT_ENTRYPOINT}"                 health                 2>&1
+        )"
 
         rc=$?
 
         set -e
 
+        printf '%s\n' "${output}" >&2
         echo "[subject_health] exit=${rc}" >&2
 
         if (( rc == 0 )); then

@@ -269,9 +269,7 @@ EXPORT_DIR="${REPORT_DIR}/exports"
 
 mkdir -p -- "${REPORT_DIR}" "${EXPORT_DIR}"
 
-export VRP_LAB_JQ_IMAGE="${
-    VRP_LAB_JQ_IMAGE:-ghcr.io/jqlang/jq:1.7.1
-}"
+export VRP_LAB_JQ_IMAGE="${VRP_LAB_JQ_IMAGE:-ghcr.io/jqlang/jq:1.7.1}"
 
 validate_image_reference "${VRP_LAB_JQ_IMAGE}"
 
