@@ -535,6 +535,7 @@ def wifi_checks($scenario; $subject; $witness; $progress; $transitions):
   | ($scenario.acceptance.parameters.minimum_baseline_progress_events // -1) as $minimum_before
   | ($scenario.acceptance.parameters.minimum_post_transition_progress_events // -1) as $minimum_after
   | ($scenario.acceptance.parameters.maximum_recovery_seconds // -1) as $maximum_recovery
+  | ($scenario.acceptance.parameters.transition_time_tolerance_seconds // 2) as $transition_tolerance
   | if $fault_time == null then
       [
         result(
@@ -560,7 +561,7 @@ def wifi_checks($scenario; $subject; $witness; $progress; $transitions):
               and (
                 epoch(.observed_at_utc) as $transition_time
                 | $transition_time != null
-                  and $transition_time >= $fault_time
+                  and ($transition_time >= ($fault_time - $transition_tolerance))
               )
             )
         ] as $mobile_transitions

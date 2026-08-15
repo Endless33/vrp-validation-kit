@@ -651,6 +651,33 @@ execute_scheduled_event() {
                     "${event_id}.blackout-ended" \
                     "${target}" \
                     "confirmed"
+
+                record_event \
+                    "stimulus.blackout-end.requested" \
+                    "${event_id}.blackout-end" \
+                    "subject" \
+                    "requested"
+
+                echo "[blackout-recovery] delivering blackout-end to subject=${SUBJECT_CID}" >&2
+
+                if ! timeout "${STIMULUS_TIMEOUT_SECONDS}s" \
+                    docker exec \
+                    "${SUBJECT_CID}" \
+                    "${VRP_LAB_SUBJECT_ENTRYPOINT}" \
+                    stimulus \
+                    --kind "blackout-end" \
+                    --event-id "${event_id}.blackout-end" \
+                    >/dev/null 2>&1; then
+                    die "Subject did not accept blackout-end stimulus: ${event_id}"
+                fi
+
+                record_event \
+                    "stimulus.blackout-end.delivered" \
+                    "${event_id}.blackout-end.delivered" \
+                    "subject" \
+                    "delivered"
+
+                echo "[blackout-recovery] blackout-end delivered" >&2
             fi
             ;;
 
@@ -669,6 +696,31 @@ execute_scheduled_event() {
                 "${event_id}" \
                 "all-declared-paths" \
                 "confirmed"
+
+            if [[ "${SCENARIO_ID}" == "blackout-recovery" ]]; then
+                record_event \
+                    "stimulus.blackout-start.requested" \
+                    "${event_id}.blackout-start" \
+                    "subject" \
+                    "requested"
+
+                if ! timeout "${STIMULUS_TIMEOUT_SECONDS}s" \
+                    docker exec \
+                    "${SUBJECT_CID}" \
+                    "${VRP_LAB_SUBJECT_ENTRYPOINT}" \
+                    stimulus \
+                    --kind "blackout-start" \
+                    --event-id "${event_id}.blackout-start" \
+                    >/dev/null 2>&1; then
+                    die "Subject did not accept blackout-start stimulus: ${event_id}"
+                fi
+
+                record_event \
+                    "stimulus.blackout-start.delivered" \
+                    "${event_id}.blackout-start.delivered" \
+                    "subject" \
+                    "delivered"
+            fi
             ;;
 
         paths.enable)
@@ -686,6 +738,42 @@ execute_scheduled_event() {
                 "${event_id}" \
                 "all-declared-paths" \
                 "confirmed"
+
+            if [[ "${SCENARIO_ID}" == "blackout-recovery" ]]; then
+                echo "[TRACE] blackout-end: ENTER IF scenario=${SCENARIO_ID} subject=${SUBJECT_CID}" >&2
+
+                echo "[TRACE] blackout-end: BEFORE requested record" >&2
+                record_event \
+                    "stimulus.blackout-end.requested" \
+                    "${event_id}.blackout-end" \
+                    "subject" \
+                    "requested"
+                echo "[TRACE] blackout-end: AFTER requested record" >&2
+
+                echo "[TRACE] blackout-end: BEFORE docker exec" >&2
+                if ! timeout "${STIMULUS_TIMEOUT_SECONDS}s" \
+                    docker exec \
+                    "${SUBJECT_CID}" \
+                    "${VRP_LAB_SUBJECT_ENTRYPOINT}" \
+                    stimulus \
+                    --kind "blackout-end" \
+                    --event-id "${event_id}.blackout-end" \
+                    >/dev/null 2>&1; then
+                    echo "[TRACE] blackout-end: docker exec FAILED" >&2
+                    die "Subject did not accept blackout-end stimulus: ${event_id}"
+                fi
+                echo "[TRACE] blackout-end: AFTER docker exec" >&2
+
+                echo "[TRACE] blackout-end: BEFORE delivered record" >&2
+                record_event \
+                    "stimulus.blackout-end.delivered" \
+                    "${event_id}.blackout-end.delivered" \
+                    "subject" \
+                    "delivered"
+                echo "[TRACE] blackout-end: AFTER delivered record" >&2
+            else
+                echo "[TRACE] blackout-end: IF SKIPPED scenario=${SCENARIO_ID}" >&2
+            fi
             ;;
 
         subject.stimulus)
@@ -696,11 +784,8 @@ execute_scheduled_event() {
                 "requested"
 
             if ! timeout "${STIMULUS_TIMEOUT_SECONDS}s" \
-                "${COMPOSE_BASE[@]}" \
-                --profile subject \
-                exec \
-                -T \
-                subject \
+                docker exec \
+                "${SUBJECT_CID}" \
                 "${VRP_LAB_SUBJECT_ENTRYPOINT}" \
                 stimulus \
                 --kind "${stimulus_kind}" \
@@ -915,8 +1000,19 @@ mkdir -p \
     "${RUN_DIR}/witness" \
     "${RUN_DIR}/report"
 
+chmod 0755 \
+    "${RUN_DIR}" \
+    "${RUN_DIR}/input" \
+    "${RUN_DIR}/subject" \
+    "${RUN_DIR}/witness" \
+    "${RUN_DIR}/report"
+
 cp -- "${CONFIG_PATH}" "${RUN_DIR}/input/scenario.yaml"
 cp -- "${DEFAULT_CONTRACT_PATH}" \
+    "${RUN_DIR}/input/invariant-contract.json"
+
+chmod 0644 \
+    "${RUN_DIR}/input/scenario.yaml" \
     "${RUN_DIR}/input/invariant-contract.json"
 
 EVENT_COUNT="$(
@@ -934,6 +1030,8 @@ declare -A SEEN_EVENT_IDS=()
 LAST_EVENT_OFFSET=-1
 
 : >"${RUN_DIR}/input/schedule.tsv"
+
+chmod 0644 "${RUN_DIR}/input/schedule.tsv"
 
 for ((event_index = 0; event_index < EVENT_COUNT; event_index++)); do
     EVENT_OFFSET="$(
@@ -1004,7 +1102,9 @@ for ((event_index = 0; event_index < EVENT_COUNT; event_index++)); do
                 die "Stimulus action must target subject"
 
             [[ "${EVENT_KIND}" == "stale-authority" ||
-                "${EVENT_KIND}" == "replay" ]] ||
+                "${EVENT_KIND}" == "replay" ||
+                "${EVENT_KIND}" == "blackout-start" ||
+                "${EVENT_KIND}" == "blackout-end" ]] ||
                 die "Unsupported public stimulus kind"
             ;;
 
@@ -1024,6 +1124,7 @@ for ((event_index = 0; event_index < EVENT_COUNT; event_index++)); do
 done
 
 export VRP_LAB_RUN_ID="${RUN_ID}"
+export VRP_LAB_SCENARIO_ID="${SCENARIO_ID}"
 export VRP_LAB_RUN_DURATION_SECONDS="$((DURATION_SECONDS + SUBJECT_READY_TIMEOUT_SECONDS))"
 export VRP_LAB_SUBJECT_OUTPUT_DIR="${RUN_DIR}/subject"
 
@@ -1038,6 +1139,8 @@ RUN_STARTED_AT_UTC="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 RUN_CLOCK_START_SECONDS="${SECONDS}"
 
 : >"${RUN_DIR}/witness/events.jsonl"
+
+chmod 0644 "${RUN_DIR}/witness/events.jsonl"
 WITNESS_READY=1
 
 trap on_exit EXIT
@@ -1154,6 +1257,21 @@ while :; do
 done
 
 TIMELINE_START_SECONDS="${SECONDS}"
+
+echo "========================================" >&2
+echo "[subject_lifecycle] TIMELINE START" >&2
+echo "[subject_lifecycle] SUBJECT_CID=${SUBJECT_CID}" >&2
+echo "[subject_lifecycle] SECONDS=${SECONDS}" >&2
+
+if [[ -n "${SUBJECT_CID}" ]]; then
+    docker inspect \
+        --format '[subject_lifecycle] Running={{.State.Running}} Status={{.State.Status}} ExitCode={{.State.ExitCode}} StartedAt={{.State.StartedAt}} FinishedAt={{.State.FinishedAt}}' \
+        "${SUBJECT_CID}" \
+        2>&1 >&2 || true
+fi
+
+echo "[subject_lifecycle] subject_is_running=$(subject_is_running && echo true || echo false)" >&2
+echo "========================================" >&2
 
 record_event \
     "subject.ready" \

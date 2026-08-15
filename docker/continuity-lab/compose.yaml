@@ -129,6 +129,7 @@ services:
     environment:
       VRP_LAB_CONTRACT_VERSION: "1"
       VRP_LAB_RUN_ID: "${VRP_LAB_RUN_ID:-manual}"
+      VRP_LAB_SCENARIO_ID: "${VRP_LAB_SCENARIO_ID:-manual}"
       VRP_LAB_RUN_DURATION_SECONDS: "${VRP_LAB_RUN_DURATION_SECONDS:-60}"
       VRP_LAB_PRIMARY_ENDPOINT: "http://wifi-gateway:8080"
       VRP_LAB_ALTERNATE_ENDPOINT: "http://mobile-gateway:8080"

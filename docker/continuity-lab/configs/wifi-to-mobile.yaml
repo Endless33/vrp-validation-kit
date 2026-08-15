@@ -101,6 +101,7 @@ acceptance:
     minimum_post_transition_progress_events: 5
     maximum_continuity_reference_count: 1
     maximum_duplicate_accepted_mutations: 0
+    transition_time_tolerance_seconds: 2
 
 evidence:
   format: "public-evidence-v1"
