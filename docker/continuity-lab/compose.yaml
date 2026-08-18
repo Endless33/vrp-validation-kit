@@ -1,0 +1,190 @@
+x-hardened-service: &hardened-service
+  cap_drop:
+    - ALL
+  security_opt:
+    - no-new-privileges:true
+  read_only: true
+  init: true
+  restart: "no"
+
+services:
+  origin:
+    image: "${VRP_LAB_ORIGIN_IMAGE:-hashicorp/http-echo:1.0.0}"
+    command:
+      - "-listen=:8080"
+      - "-text=vrp-continuity-lab-origin"
+    expose:
+      - "8080"
+    networks:
+      origin-plane:
+        aliases:
+          - origin
+    <<: *hardened-service
+    pids_limit: 64
+    mem_limit: 64m
+    cpus: "0.25"
+    labels:
+      io.vrp.lab.role: origin
+      io.vrp.lab.boundary: public-test-infrastructure
+
+  fault-engine:
+    image: "${VRP_LAB_FAULT_ENGINE_IMAGE:-ghcr.io/shopify/toxiproxy:2.12.0}"
+    expose:
+      - "8474"
+      - "8666"
+      - "8667"
+    networks:
+      - control-plane
+      - relay-plane
+      - origin-plane
+    depends_on:
+      origin:
+        condition: service_started
+    <<: *hardened-service
+    pids_limit: 128
+    mem_limit: 128m
+    cpus: "0.50"
+    labels:
+      io.vrp.lab.role: fault-engine
+      io.vrp.lab.boundary: harness-controlled
+
+  wifi-gateway:
+    image: "${VRP_LAB_RELAY_IMAGE:-alpine/socat:1.8.0.0}"
+    entrypoint:
+      - /usr/bin/socat
+    command:
+      - "TCP-LISTEN:8080,fork,reuseaddr"
+      - "TCP:fault-engine:8666"
+    expose:
+      - "8080"
+    networks:
+      wifi-plane:
+        aliases:
+          - wifi-gateway
+      relay-plane: {}
+    depends_on:
+      fault-engine:
+        condition: service_started
+    <<: *hardened-service
+    pids_limit: 128
+    mem_limit: 64m
+    cpus: "0.25"
+    labels:
+      io.vrp.lab.role: path-gateway
+      io.vrp.lab.path: wifi
+
+  mobile-gateway:
+    image: "${VRP_LAB_RELAY_IMAGE:-alpine/socat:1.8.0.0}"
+    entrypoint:
+      - /usr/bin/socat
+    command:
+      - "TCP-LISTEN:8080,fork,reuseaddr"
+      - "TCP:fault-engine:8667"
+    expose:
+      - "8080"
+    networks:
+      mobile-plane:
+        aliases:
+          - mobile-gateway
+      relay-plane: {}
+    depends_on:
+      fault-engine:
+        condition: service_started
+    <<: *hardened-service
+    pids_limit: 128
+    mem_limit: 64m
+    cpus: "0.25"
+    labels:
+      io.vrp.lab.role: path-gateway
+      io.vrp.lab.path: mobile
+
+  controller:
+    image: "${VRP_LAB_CONTROLLER_IMAGE:-curlimages/curl:8.12.1}"
+    profiles:
+      - tools
+    entrypoint:
+      - curl
+      - --fail-with-body
+      - --silent
+      - --show-error
+    networks:
+      - control-plane
+    <<: *hardened-service
+    pids_limit: 32
+    mem_limit: 32m
+    cpus: "0.25"
+    labels:
+      io.vrp.lab.role: controller
+      io.vrp.lab.boundary: harness-only
+
+  subject:
+    image: "${VRP_LAB_SUBJECT_IMAGE:?Set VRP_LAB_SUBJECT_IMAGE to an authorized black-box adapter image}"
+    profiles:
+      - subject
+    user: "${VRP_LAB_SUBJECT_UID:-65532}:${VRP_LAB_SUBJECT_GID:-65532}"
+    entrypoint:
+      - "${VRP_LAB_SUBJECT_ENTRYPOINT:-/vrp-lab-adapter}"
+    command:
+      - run
+    environment:
+      VRP_LAB_CONTRACT_VERSION: "1"
+      VRP_LAB_RUN_ID: "${VRP_LAB_RUN_ID:-manual}"
+      VRP_LAB_SCENARIO_ID: "${VRP_LAB_SCENARIO_ID:-manual}"
+      VRP_LAB_RUN_DURATION_SECONDS: "${VRP_LAB_RUN_DURATION_SECONDS:-60}"
+      VRP_LAB_PRIMARY_ENDPOINT: "http://wifi-gateway:8080"
+      VRP_LAB_ALTERNATE_ENDPOINT: "http://mobile-gateway:8080"
+      VRP_LAB_EVIDENCE_DIRECTORY: "/evidence"
+      VRP_LAB_EVIDENCE_FORMAT: "public-evidence-v1"
+    volumes:
+      - type: bind
+        source: "${VRP_LAB_SUBJECT_OUTPUT_DIR:-./out/manual/subject}"
+        target: /evidence
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=64m
+    networks:
+      - wifi-plane
+      - mobile-plane
+    depends_on:
+      wifi-gateway:
+        condition: service_started
+      mobile-gateway:
+        condition: service_started
+    <<: *hardened-service
+    stop_grace_period: 15s
+    pids_limit: 256
+    mem_limit: "${VRP_LAB_SUBJECT_MEMORY_LIMIT:-512m}"
+    cpus: "${VRP_LAB_SUBJECT_CPU_LIMIT:-1.00}"
+    labels:
+      io.vrp.lab.role: black-box-subject
+      io.vrp.lab.disclosure: evidence-only
+
+networks:
+  control-plane:
+    driver: bridge
+    internal: true
+    labels:
+      io.vrp.lab.zone: harness-control
+
+  relay-plane:
+    driver: bridge
+    internal: true
+    labels:
+      io.vrp.lab.zone: isolated-relay
+
+  origin-plane:
+    driver: bridge
+    internal: true
+    labels:
+      io.vrp.lab.zone: test-origin
+
+  wifi-plane:
+    driver: bridge
+    internal: true
+    labels:
+      io.vrp.lab.zone: simulated-wifi-path
+
+  mobile-plane:
+    driver: bridge
+    internal: true
+    labels:
+      io.vrp.lab.zone: simulated-mobile-path

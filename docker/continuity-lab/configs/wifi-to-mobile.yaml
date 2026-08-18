@@ -1,0 +1,147 @@
+schema_version: "vrp-continuity-lab/scenario-v1"
+
+scenario:
+  id: "wifi-to-mobile"
+  title: "Logical Wi-Fi to Mobile Path Transition"
+  category: "path-transition"
+  description: >-
+    Evaluate externally observable continuity behavior when the primary
+    logical path becomes unavailable while an alternate logical path
+    remains reachable.
+  public_claim: >-
+    Loss of the primary logical path does not by itself require replacement
+    of the public continuity reference when an eligible alternate path
+    remains available.
+
+execution:
+  duration_seconds: 60
+  infrastructure_ready_timeout_seconds: 30
+  subject_ready_timeout_seconds: 20
+  completion_grace_seconds: 15
+  timeline_origin: "subject-ready"
+  clock_source: "host-monotonic"
+
+topology:
+  profile: "dual-path-single-origin-v1"
+  logical_paths:
+    - id: "wifi"
+      role: "primary"
+      initial_state: "enabled"
+    - id: "mobile"
+      role: "alternate"
+      initial_state: "enabled"
+  control_plane_visible_to_subject: false
+  scenario_schedule_visible_to_subject: false
+  host_ports_published: false
+
+preconditions:
+  - id: "origin-reachable"
+    check: "origin.reachable"
+    target: "origin"
+    required: true
+
+  - id: "wifi-path-reachable"
+    check: "path.reachable"
+    target: "wifi"
+    required: true
+
+  - id: "mobile-path-reachable"
+    check: "path.reachable"
+    target: "mobile"
+    required: true
+
+  - id: "subject-ready"
+    check: "subject.health"
+    target: "subject"
+    required: true
+
+fault_schedule:
+  - event_id: "wifi-disable-001"
+    at_seconds: 15
+    action: "path.disable"
+    target: "wifi"
+    witness_required: true
+    description: >-
+      Disable the primary logical path while leaving the alternate
+      logical path and origin available.
+
+observation_windows:
+  baseline:
+    begins_at: "subject-ready"
+    ends_at: "wifi-disable-001"
+    minimum_successful_progress_events: 5
+
+  transition:
+    begins_at: "wifi-disable-001"
+    maximum_recovery_seconds: 12
+
+  post_transition:
+    begins_after: "wifi-disable-001"
+    ends_at: "run-complete"
+    minimum_successful_progress_events: 5
+    expected_active_path: "mobile"
+
+acceptance:
+  contract: "../expected/invariant-contract.json"
+
+  required_invariants:
+    - "VRP-LAB-EVIDENCE-COMPLETE"
+    - "VRP-LAB-RUN-ID-CONSISTENT"
+    - "VRP-LAB-EVENT-SEQUENCE-MONOTONIC"
+    - "VRP-LAB-EVENT-ID-UNIQUE"
+    - "VRP-LAB-CONTINUITY-REFERENCE-STABLE"
+    - "VRP-LAB-PATH-TRANSITION-OBSERVED"
+    - "VRP-LAB-PROGRESS-RESUMED"
+    - "VRP-LAB-NO-DUPLICATE-ACCEPTANCE"
+
+  parameters:
+    expected_final_active_path: "mobile"
+    maximum_recovery_seconds: 12
+    minimum_baseline_progress_events: 5
+    minimum_post_transition_progress_events: 5
+    maximum_continuity_reference_count: 1
+    maximum_duplicate_accepted_mutations: 0
+    transition_time_tolerance_seconds: 2
+
+evidence:
+  format: "public-evidence-v1"
+
+  required_subject_artifacts:
+    - "subject-evidence.json"
+    - "subject-events.jsonl"
+
+  required_witness_events:
+    - "infrastructure.ready"
+    - "subject.ready"
+    - "path.wifi.disabled"
+    - "subject.completed"
+    - "run.completed"
+
+  prohibited_content:
+    raw_protected_packets: true
+    cryptographic_keys: true
+    credentials: true
+    protected_tokens: true
+    internal_runtime_state: true
+    proprietary_decision_traces: true
+    source_code_paths: true
+
+verdict_policy:
+  fail_closed: true
+  missing_required_evidence: "INCOMPLETE"
+  infrastructure_failure: "INCOMPLETE"
+  unexpected_harness_error: "INCOMPLETE"
+  contradicted_invariant: "FAIL"
+  subject_failure_with_healthy_infrastructure: "FAIL"
+  all_required_invariants_satisfied: "PASS"
+
+limitations:
+  - >-
+    The logical path names do not emulate complete Wi-Fi or mobile-radio
+    protocol stacks.
+  - >-
+    This scenario evaluates only the declared public observations for one
+    bounded run.
+  - >-
+    A PASS result does not expose or independently prove the protected
+    implementation used by the subject.

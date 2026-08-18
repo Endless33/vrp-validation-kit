@@ -1,0 +1,654 @@
+{
+  "schema_version": "vrp-continuity-lab/invariant-contract-v1",
+  "contract_version": "1.0.0",
+  "contract_id": "vrp-docker-continuity-public-invariants",
+  "status": "public-evaluation-contract",
+  "normative_language": {
+    "MUST": "An unconditional requirement for a valid evaluation.",
+    "MUST_NOT": "An unconditional prohibition.",
+    "SHOULD": "A recommended condition that may be omitted only with a recorded reason.",
+    "MAY": "An optional behavior that does not affect validity unless selected by a scenario."
+  },
+  "scope": {
+    "evaluation_model": "black-box",
+    "evidence_scope": "externally-observable-public-behavior",
+    "runtime_source_required": false,
+    "protected_runtime_material_required": false,
+    "internal_algorithm_disclosure_required": false,
+    "description": "This contract defines the public evidence relationships required to evaluate bounded Docker continuity scenarios without describing or reproducing the protected runtime implementation."
+  },
+  "verdict_policy": {
+    "PASS": "Every globally required and scenario-required invariant returned PASS.",
+    "FAIL": "At least one required invariant returned FAIL.",
+    "INCOMPLETE": "No required invariant returned FAIL, but at least one required invariant could not be evaluated from complete and consistent evidence.",
+    "precedence": [
+      "FAIL",
+      "INCOMPLETE",
+      "PASS"
+    ],
+    "subject_may_self_certify": false,
+    "missing_evidence_may_be_inferred": false
+  },
+  "global_required_invariants": [
+    "VRP-LAB-ARTIFACT-HASHES-MATCH",
+    "VRP-LAB-SCHEMA-COMPATIBLE",
+    "VRP-LAB-PROHIBITED-FIELDS-ABSENT",
+    "VRP-LAB-EVIDENCE-COUNTERS-CONSISTENT",
+    "VRP-LAB-CONTRACT-COVERAGE",
+    "VRP-LAB-EVIDENCE-COMPLETE",
+    "VRP-LAB-RUN-ID-CONSISTENT",
+    "VRP-LAB-EVENT-SEQUENCE-MONOTONIC",
+    "VRP-LAB-EVENT-ID-UNIQUE",
+    "VRP-LAB-NO-DUPLICATE-ACCEPTANCE"
+  ],
+  "scenario_invariant_profiles": {
+    "wifi-to-mobile": [
+      "VRP-LAB-CONTINUITY-REFERENCE-STABLE",
+      "VRP-LAB-PATH-TRANSITION-OBSERVED",
+      "VRP-LAB-PROGRESS-RESUMED"
+    ],
+    "blackout-recovery": [
+      "VRP-LAB-CONTINUITY-REFERENCE-STABLE",
+      "VRP-LAB-BLACKOUT-OBSERVED",
+      "VRP-LAB-RECOVERY-OBSERVED",
+      "VRP-LAB-PROGRESS-RESUMED"
+    ],
+    "stale-authority": [
+      "VRP-LAB-CONTINUITY-REFERENCE-STABLE",
+      "VRP-LAB-STALE-AUTHORITY-REJECTED",
+      "VRP-LAB-REJECTED-STIMULUS-NO-MUTATION",
+      "VRP-LAB-PROGRESS-PRESERVED"
+    ],
+    "replay-attempt": [
+      "VRP-LAB-CONTINUITY-REFERENCE-STABLE",
+      "VRP-LAB-REPLAY-SOURCE-OBSERVED",
+      "VRP-LAB-REPLAY-REJECTED",
+      "VRP-LAB-REPLAY-NO-DUPLICATE-MUTATION",
+      "VRP-LAB-PROGRESS-PRESERVED"
+    ]
+  },
+  "public_evidence_schemas": {
+    "subject_evidence": {
+      "schema_version": "vrp-continuity-lab/subject-evidence-v1",
+      "evidence_format": "public-evidence-v1",
+      "required_fields": [
+        "schema_version",
+        "evidence_format",
+        "run_id",
+        "adapter",
+        "started_at_utc",
+        "completed_at_utc",
+        "completion_state",
+        "public_verdict",
+        "continuity_reference",
+        "final_active_path",
+        "summary"
+      ],
+      "adapter_required_fields": [
+        "public_id",
+        "version"
+      ],
+      "summary_required_fields": [
+        "successful_progress_event_count",
+        "path_transition_count",
+        "accepted_mutation_count",
+        "duplicate_accepted_mutation_count",
+        "stale_authority_rejection_count",
+        "replay_rejection_count"
+      ],
+      "required_values": {
+        "evidence_format": "public-evidence-v1",
+        "completion_state": "complete",
+        "public_verdict": "evidence-ready"
+      },
+      "counter_rules": {
+        "type": "non-negative-integer",
+        "must_match_subject_event_stream": true
+      }
+    },
+    "subject_event": {
+      "schema_version": "vrp-continuity-lab/subject-event-v1",
+      "required_fields": [
+        "schema_version",
+        "run_id",
+        "event_sequence",
+        "event_id",
+        "event_kind",
+        "public_verdict",
+        "observed_at_utc"
+      ],
+      "conditional_fields": {
+        "continuity_reference": [
+          "progress",
+          "path-transition",
+          "mutation"
+        ],
+        "logical_path": [
+          "progress",
+          "path-transition"
+        ],
+        "public_operation_reference": [
+          "mutation",
+          "replay-related-stimulus-verdict"
+        ],
+        "related_witness_event_id": [
+          "stimulus-verdict"
+        ]
+      },
+      "event_kinds": [
+        "progress",
+        "path-transition",
+        "mutation",
+        "stimulus-verdict",
+        "lifecycle"
+      ],
+      "public_verdicts": {
+        "progress": [
+          "succeeded",
+          "failed",
+          "paused"
+        ],
+        "path-transition": [
+          "observed"
+        ],
+        "mutation": [
+          "accepted",
+          "rejected",
+          "accepted-duplicate"
+        ],
+        "stimulus-verdict": [
+          "rejected-stale-authority",
+          "rejected-replay",
+          "accepted"
+        ],
+        "lifecycle": [
+          "ready",
+          "completed"
+        ]
+      }
+    },
+    "witness_event": {
+      "schema_version": "vrp-continuity-lab/witness-event-v1",
+      "required_fields": [
+        "schema_version",
+        "run_id",
+        "scenario_id",
+        "event_sequence",
+        "event_id",
+        "event_kind",
+        "target",
+        "outcome",
+        "observed_at_utc",
+        "run_elapsed_seconds"
+      ],
+      "controlled_by": "evaluation-harness",
+      "writable_by_subject": false
+    }
+  },
+  "reference_rules": {
+    "continuity_reference": {
+      "classification": "opaque-public-identifier",
+      "maximum_length": 256,
+      "must_remain_stable_when_required": true,
+      "must_not_contain": [
+        "credentials",
+        "protected tokens",
+        "key material",
+        "serialized internal state",
+        "recoverable private identifiers"
+      ]
+    },
+    "public_operation_reference": {
+      "classification": "opaque-public-identifier",
+      "maximum_length": 256,
+      "purpose": "Correlate public mutation and replay observations without exporting the protected operation artifact.",
+      "must_not_contain": [
+        "protected payloads",
+        "authorization material",
+        "cryptographic secrets",
+        "internal object serialization"
+      ]
+    },
+    "related_witness_event_id": {
+      "classification": "public-correlation-identifier",
+      "purpose": "Link a subject observation to the harness event that requested the corresponding public stimulus."
+    }
+  },
+  "time_rules": {
+    "timestamp_format": "UTC-RFC3339-seconds",
+    "example": "2026-08-06T12:00:00Z",
+    "event_order_source": "event_sequence",
+    "timing_source": "recorded-witness-and-subject-timestamps",
+    "cycle_accurate_guarantee": false,
+    "shared_host_scheduling_must_be_considered": true
+  },
+  "prohibited_subject_evidence": {
+    "field_categories": [
+      "private keys",
+      "secrets",
+      "credentials",
+      "bearer material",
+      "protected tokens",
+      "raw packets",
+      "raw protected payloads",
+      "raw protected artifacts",
+      "internal runtime state",
+      "stack traces",
+      "source-code paths",
+      "proprietary decision traces"
+    ],
+    "value_categories": [
+      "private-key blocks",
+      "production credentials",
+      "internal filesystem paths",
+      "protected serialized objects",
+      "unbounded binary or text blobs"
+    ],
+    "maximum_single_string_length": 4096,
+    "container_logs_exported": false,
+    "packet_captures_exported": false,
+    "runtime_binary_exported": false
+  },
+  "invariants": [
+    {
+      "id": "VRP-LAB-ARTIFACT-HASHES-MATCH",
+      "category": "integrity",
+      "title": "Manifest-bound artifact hashes match",
+      "requirement": "Every required artifact path and SHA-256 digest declared by the run manifest MUST match the corresponding captured artifact.",
+      "evidence_sources": [
+        "manifest.json",
+        "input/scenario.yaml",
+        "input/schedule.tsv",
+        "input/invariant-contract.json",
+        "witness/environment.json",
+        "witness/events.jsonl",
+        "subject/subject-evidence.json",
+        "subject/subject-events.jsonl"
+      ],
+      "failure_status": "FAIL",
+      "missing_evidence_status": "INCOMPLETE",
+      "does_not_assert": [
+        "artifact authorship",
+        "external timestamp authority",
+        "cryptographic signature validity"
+      ]
+    },
+    {
+      "id": "VRP-LAB-SCHEMA-COMPATIBLE",
+      "category": "structure",
+      "title": "Public evidence schemas are compatible",
+      "requirement": "Every required evidence object and event MUST use a schema version supported by this contract and verifier.",
+      "evidence_sources": [
+        "all captured public JSON and JSONL artifacts"
+      ],
+      "failure_status": "INCOMPLETE",
+      "missing_evidence_status": "INCOMPLETE",
+      "does_not_assert": [
+        "semantic correctness of the hidden implementation"
+      ]
+    },
+    {
+      "id": "VRP-LAB-PROHIBITED-FIELDS-ABSENT",
+      "category": "disclosure-boundary",
+      "title": "Protected material is absent from subject evidence",
+      "requirement": "Subject evidence MUST NOT contain prohibited fields or material outside the public evidence boundary.",
+      "evidence_sources": [
+        "subject/subject-evidence.json",
+        "subject/subject-events.jsonl"
+      ],
+      "failure_status": "FAIL",
+      "missing_evidence_status": "INCOMPLETE",
+      "does_not_assert": [
+        "absence of protected material outside the exported evidence directory"
+      ]
+    },
+    {
+      "id": "VRP-LAB-EVIDENCE-COUNTERS-CONSISTENT",
+      "category": "consistency",
+      "title": "Summary counters match the event stream",
+      "requirement": "Every subject summary counter MUST equal the corresponding count derived from the ordered public subject-event stream.",
+      "evidence_sources": [
+        "subject/subject-evidence.json",
+        "subject/subject-events.jsonl"
+      ],
+      "failure_status": "FAIL",
+      "missing_evidence_status": "INCOMPLETE",
+      "does_not_assert": [
+        "correctness of unexported internal counters"
+      ]
+    },
+    {
+      "id": "VRP-LAB-CONTRACT-COVERAGE",
+      "category": "evaluation",
+      "title": "Every required invariant has an evaluator",
+      "requirement": "Every globally required and scenario-required invariant MUST be uniquely defined by this contract and supported by the active verifier.",
+      "evidence_sources": [
+        "input/scenario.yaml",
+        "input/invariant-contract.json",
+        "verification implementation"
+      ],
+      "failure_status": "INCOMPLETE",
+      "missing_evidence_status": "INCOMPLETE",
+      "does_not_assert": [
+        "coverage of undeclared behavior"
+      ]
+    },
+    {
+      "id": "VRP-LAB-EVIDENCE-COMPLETE",
+      "category": "completeness",
+      "title": "Required evidence is complete",
+      "requirement": "The run, subject, witness, environment, and contract artifacts required by the selected scenario MUST be present and marked complete.",
+      "evidence_sources": [
+        "manifest.json",
+        "input/scenario.yaml",
+        "input/invariant-contract.json",
+        "witness/environment.json",
+        "witness/events.jsonl",
+        "subject/subject-evidence.json",
+        "subject/subject-events.jsonl"
+      ],
+      "failure_status": "INCOMPLETE",
+      "missing_evidence_status": "INCOMPLETE",
+      "does_not_assert": [
+        "that complete evidence necessarily satisfies the selected invariants"
+      ]
+    },
+    {
+      "id": "VRP-LAB-RUN-ID-CONSISTENT",
+      "category": "isolation",
+      "title": "Run identifier is consistent",
+      "requirement": "The same run identifier MUST be present across the manifest, environment, witness events, subject summary, and subject events.",
+      "evidence_sources": [
+        "manifest.json",
+        "witness/environment.json",
+        "witness/events.jsonl",
+        "subject/subject-evidence.json",
+        "subject/subject-events.jsonl"
+      ],
+      "failure_status": "FAIL",
+      "missing_evidence_status": "INCOMPLETE",
+      "does_not_assert": [
+        "global uniqueness outside the retained evaluation records"
+      ]
+    },
+    {
+      "id": "VRP-LAB-EVENT-SEQUENCE-MONOTONIC",
+      "category": "ordering",
+      "title": "Event sequences are strictly monotonic",
+      "requirement": "Witness and subject event sequences MUST begin at one and advance by exactly one without gaps, rollback, or duplication.",
+      "evidence_sources": [
+        "witness/events.jsonl",
+        "subject/subject-events.jsonl"
+      ],
+      "failure_status": "FAIL",
+      "missing_evidence_status": "INCOMPLETE",
+      "does_not_assert": [
+        "global distributed ordering outside the bounded run"
+      ]
+    },
+    {
+      "id": "VRP-LAB-EVENT-ID-UNIQUE",
+      "category": "ordering",
+      "title": "Public event identifiers are unique",
+      "requirement": "Every event identifier MUST be non-empty and unique within its witness or subject event stream.",
+      "evidence_sources": [
+        "witness/events.jsonl",
+        "subject/subject-events.jsonl"
+      ],
+      "failure_status": "FAIL",
+      "missing_evidence_status": "INCOMPLETE",
+      "does_not_assert": [
+        "uniqueness across unrelated runs"
+      ]
+    },
+    {
+      "id": "VRP-LAB-CONTINUITY-REFERENCE-STABLE",
+      "category": "continuity",
+      "title": "Public continuity reference remains stable",
+      "requirement": "Exactly one opaque public continuity reference MUST be observed throughout the scenario when the selected acceptance profile requires continuity preservation.",
+      "evidence_sources": [
+        "subject/subject-evidence.json",
+        "subject/subject-events.jsonl"
+      ],
+      "failure_status": "FAIL",
+      "missing_evidence_status": "INCOMPLETE",
+      "does_not_assert": [
+        "internal session representation",
+        "internal key continuity",
+        "transport implementation details"
+      ]
+    },
+    {
+      "id": "VRP-LAB-NO-DUPLICATE-ACCEPTANCE",
+      "category": "mutation-safety",
+      "title": "No duplicate accepted mutation",
+      "requirement": "The public event stream MUST NOT contain duplicate acceptance for the same opaque public operation reference.",
+      "evidence_sources": [
+        "subject/subject-evidence.json",
+        "subject/subject-events.jsonl"
+      ],
+      "failure_status": "FAIL",
+      "missing_evidence_status": "INCOMPLETE",
+      "does_not_assert": [
+        "internal storage-engine implementation",
+        "application behavior outside the adapter boundary"
+      ]
+    },
+    {
+      "id": "VRP-LAB-PATH-TRANSITION-OBSERVED",
+      "category": "path-change",
+      "title": "Alternate logical path becomes active",
+      "requirement": "After the witnessed primary-path failure, at least one public path-transition event MUST identify the alternate logical path, and the subject summary MUST report that path as final.",
+      "applies_to": [
+        "wifi-to-mobile"
+      ],
+      "evidence_sources": [
+        "witness/events.jsonl",
+        "subject/subject-evidence.json",
+        "subject/subject-events.jsonl"
+      ],
+      "failure_status": "FAIL",
+      "missing_evidence_status": "INCOMPLETE",
+      "does_not_assert": [
+        "physical Wi-Fi behavior",
+        "physical cellular behavior",
+        "radio-layer handover"
+      ]
+    },
+    {
+      "id": "VRP-LAB-PROGRESS-RESUMED",
+      "category": "liveness",
+      "title": "Public workload progress resumes",
+      "requirement": "The required number of successful public progress events MUST be observed after path restoration or transition, and the first such event MUST occur within the scenario-defined recovery bound.",
+      "applies_to": [
+        "wifi-to-mobile",
+        "blackout-recovery"
+      ],
+      "evidence_sources": [
+        "input/scenario.yaml",
+        "witness/events.jsonl",
+        "subject/subject-events.jsonl"
+      ],
+      "failure_status": "FAIL",
+      "missing_evidence_status": "INCOMPLETE",
+      "does_not_assert": [
+        "unbounded liveness",
+        "cycle-accurate recovery timing"
+      ]
+    },
+    {
+      "id": "VRP-LAB-BLACKOUT-OBSERVED",
+      "category": "fault-observation",
+      "title": "Bounded dual-path blackout is observed",
+      "requirement": "The harness MUST witness the declared start and end of the dual-path blackout, and no successful public progress event may be recorded after the settling grace period and before restoration.",
+      "applies_to": [
+        "blackout-recovery"
+      ],
+      "evidence_sources": [
+        "input/scenario.yaml",
+        "witness/events.jsonl",
+        "subject/subject-events.jsonl"
+      ],
+      "failure_status": "FAIL",
+      "missing_evidence_status": "INCOMPLETE",
+      "does_not_assert": [
+        "origin failure",
+        "every physical blackout mechanism"
+      ]
+    },
+    {
+      "id": "VRP-LAB-RECOVERY-OBSERVED",
+      "category": "recovery",
+      "title": "Recovery through the restored path is observed",
+      "requirement": "After the alternate path is restored, the subject MUST complete with that path identified as active and MUST produce subsequent successful public progress.",
+      "applies_to": [
+        "blackout-recovery"
+      ],
+      "evidence_sources": [
+        "witness/events.jsonl",
+        "subject/subject-evidence.json",
+        "subject/subject-events.jsonl"
+      ],
+      "failure_status": "FAIL",
+      "missing_evidence_status": "INCOMPLETE",
+      "does_not_assert": [
+        "the protected recovery algorithm",
+        "recovery under undeclared outage duration"
+      ]
+    },
+    {
+      "id": "VRP-LAB-STALE-AUTHORITY-REJECTED",
+      "category": "admission",
+      "title": "Stale authority receives a rejection verdict",
+      "requirement": "The delivered stale-authority stimulus MUST produce exactly the required public rejection verdict within the scenario-defined observation window.",
+      "applies_to": [
+        "stale-authority"
+      ],
+      "evidence_sources": [
+        "input/scenario.yaml",
+        "witness/events.jsonl",
+        "subject/subject-evidence.json",
+        "subject/subject-events.jsonl"
+      ],
+      "failure_status": "FAIL",
+      "missing_evidence_status": "INCOMPLETE",
+      "does_not_assert": [
+        "internal authority representation",
+        "authority comparison parameters",
+        "protected authority artifact contents"
+      ]
+    },
+    {
+      "id": "VRP-LAB-REJECTED-STIMULUS-NO-MUTATION",
+      "category": "mutation-safety",
+      "title": "Rejected stale stimulus creates no accepted mutation",
+      "requirement": "No accepted mutation event may reference the witness identifier of the rejected stale-authority stimulus.",
+      "applies_to": [
+        "stale-authority"
+      ],
+      "evidence_sources": [
+        "witness/events.jsonl",
+        "subject/subject-events.jsonl"
+      ],
+      "failure_status": "FAIL",
+      "missing_evidence_status": "INCOMPLETE",
+      "does_not_assert": [
+        "unexported internal state transitions"
+      ]
+    },
+    {
+      "id": "VRP-LAB-PROGRESS-PRESERVED",
+      "category": "liveness",
+      "title": "Healthy progress continues after rejection",
+      "requirement": "The required public progress events MUST exist before and after the rejection stimulus without an unplanned path transition.",
+      "applies_to": [
+        "stale-authority",
+        "replay-attempt"
+      ],
+      "evidence_sources": [
+        "input/scenario.yaml",
+        "witness/events.jsonl",
+        "subject/subject-events.jsonl"
+      ],
+      "failure_status": "FAIL",
+      "missing_evidence_status": "INCOMPLETE",
+      "does_not_assert": [
+        "unbounded availability",
+        "behavior after unrelated failures"
+      ]
+    },
+    {
+      "id": "VRP-LAB-REPLAY-SOURCE-OBSERVED",
+      "category": "replay",
+      "title": "Replay is linked to one prior accepted operation",
+      "requirement": "The replay rejection MUST expose one opaque public operation reference that links to exactly the required prior accepted mutation recorded before the replay request.",
+      "applies_to": [
+        "replay-attempt"
+      ],
+      "evidence_sources": [
+        "input/scenario.yaml",
+        "witness/events.jsonl",
+        "subject/subject-events.jsonl"
+      ],
+      "failure_status": "FAIL",
+      "missing_evidence_status": "INCOMPLETE",
+      "does_not_assert": [
+        "protected payload contents",
+        "protected replay artifact construction"
+      ]
+    },
+    {
+      "id": "VRP-LAB-REPLAY-REJECTED",
+      "category": "replay",
+      "title": "Replay attempt receives a rejection verdict",
+      "requirement": "The delivered replay stimulus MUST produce exactly the required public replay-rejection verdict within the scenario-defined observation window.",
+      "applies_to": [
+        "replay-attempt"
+      ],
+      "evidence_sources": [
+        "input/scenario.yaml",
+        "witness/events.jsonl",
+        "subject/subject-evidence.json",
+        "subject/subject-events.jsonl"
+      ],
+      "failure_status": "FAIL",
+      "missing_evidence_status": "INCOMPLETE",
+      "does_not_assert": [
+        "the internal replay-detection mechanism",
+        "every possible replay strategy"
+      ]
+    },
+    {
+      "id": "VRP-LAB-REPLAY-NO-DUPLICATE-MUTATION",
+      "category": "mutation-safety",
+      "title": "Replay creates no additional accepted mutation",
+      "requirement": "The opaque public operation reference linked to the replay MUST have no more than the permitted total acceptance count, and no accepted mutation may be linked to the replay witness identifier.",
+      "applies_to": [
+        "replay-attempt"
+      ],
+      "evidence_sources": [
+        "input/scenario.yaml",
+        "witness/events.jsonl",
+        "subject/subject-events.jsonl"
+      ],
+      "failure_status": "FAIL",
+      "missing_evidence_status": "INCOMPLETE",
+      "does_not_assert": [
+        "internal replay-window structure",
+        "internal deduplication data structures"
+      ]
+    }
+  ],
+  "interpretation_boundary": {
+    "pass_means": "The required public observations were mutually consistent for the supplied scenario snapshot, subject image identity, contract digest, and recorded environment.",
+    "pass_does_not_mean": [
+      "formal verification of the hidden implementation",
+      "production-readiness certification",
+      "proof of every possible failure condition",
+      "disclosure of protected VRP mechanisms",
+      "authorization to access protected runtime source code"
+    ],
+    "fail_means": "At least one declared public invariant was contradicted by the captured evidence.",
+    "incomplete_means": "The evidence set or evaluator coverage was insufficient for a valid final decision."
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "audit_schema": "vrp-independent-trust-audit-v1",
+  "certificate_schema": "vrp-final-audit-certificate-v1",
+  "generated_at_utc": "2026-08-16T12:30:29Z",
+  "repository_commit": "db0e61e739b88ac9a923e2f595a4208f62ad80dd",
+  "audit_root_directory": "<redacted-local-audit-root>",
+  "phases_expected": 10,
+  "phases_sealed": 10,
+  "verification_failures": 0,
+  "phase_roots_sha256": "ed9022f140733f44fa9c3a92cf81c44154f6ec855e6554368537f049f287a122",
+  "final_audit_root_sha256": "bf49d7c13fb62da9fcc1da8fcdf3ee6121312c563a7fecb5928b5f60daa243ca",
+  "final_verdict": "PASS"
+}

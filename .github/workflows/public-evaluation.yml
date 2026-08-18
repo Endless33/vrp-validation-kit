@@ -1,0 +1,124 @@
+name: VRP Public Evaluation
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  public-evaluation:
+    name: Public Evaluation / Linux AMD64
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Environment
+        run: |
+          set -euo pipefail
+
+          echo "============================================================"
+          echo "VRP PUBLIC EVALUATION — CI ENVIRONMENT"
+          echo "============================================================"
+
+          echo "HEAD=$(git rev-parse HEAD)"
+          echo "GO_VERSION=$(go version)"
+          echo "GOOS=$(go env GOOS)"
+          echo "GOARCH=$(go env GOARCH)"
+          echo "KERNEL=$(uname -a)"
+
+      - name: Format check
+        run: |
+          set -euo pipefail
+
+          UNFORMATTED="$(gofmt -l .)"
+
+          if [ -n "$UNFORMATTED" ]; then
+            echo "Unformatted Go files:"
+            echo "$UNFORMATTED"
+            exit 1
+          fi
+
+          echo "GOFMT=PASS"
+
+      - name: Test
+        run: |
+          set -euo pipefail
+          go test ./... -count=1
+          echo "GO_TEST=PASS"
+
+      - name: Vet
+        run: |
+          set -euo pipefail
+          go vet ./...
+          echo "GO_VET=PASS"
+
+      - name: Build evaluation capsule
+        run: |
+          set -euo pipefail
+
+          mkdir -p bin
+
+          go build \
+            -trimpath \
+            -o bin/vrp-evaluate \
+            ./cmd/vrp-evaluate
+
+          sha256sum bin/vrp-evaluate | tee bin/vrp-evaluate.sha256
+
+          echo "CAPSULE_BUILD=PASS"
+
+      - name: Capsule doctor
+        run: |
+          set -euo pipefail
+          ./bin/vrp-evaluate doctor
+
+      - name: Independent sample evidence verification
+        run: |
+          set -euo pipefail
+          ./bin/vrp-evaluate verify-sample
+
+      - name: Public evaluation orchestration
+        run: |
+          set -euo pipefail
+
+          chmod +x scripts/public-evaluate.sh
+
+          ./scripts/public-evaluate.sh | tee public-evaluation-ci.log
+
+          echo
+          echo "============================================================"
+          echo "CI FINAL VERDICT"
+          echo "============================================================"
+          echo "HEAD=$(git rev-parse HEAD)"
+          echo "BINARY_SHA256=$(sha256sum bin/vrp-evaluate | awk '{print $1}')"
+          echo "FINAL_RC=0"
+          echo "FINAL_VERDICT=VRP_PUBLIC_EVALUATION_CI_PASSED"
+
+      - name: Upload evaluation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vrp-public-evaluation-${{ github.sha }}
+          path: |
+            public-evaluation-ci.log
+            bin/vrp-evaluate
+            bin/vrp-evaluate.sha256
+            out/
+          if-no-files-found: warn
+          retention-days: 30

@@ -1,0 +1,204 @@
+schema_version: "vrp-continuity-lab/scenario-v1"
+
+scenario:
+  id: "replay-attempt"
+  title: "Replay Attempt Rejection"
+  category: "admission-rejection"
+  description: >-
+    Evaluate whether an opaque artifact associated with one previously
+    accepted public operation can be presented again without creating a
+    second accepted mutation.
+  public_claim: >-
+    A replayed operation must not produce duplicate acceptance, replace the
+    active public continuity reference, or terminate otherwise healthy
+    workload progress.
+
+execution:
+  duration_seconds: 55
+  infrastructure_ready_timeout_seconds: 30
+  subject_ready_timeout_seconds: 20
+  stimulus_delivery_timeout_seconds: 10
+  completion_grace_seconds: 15
+  timeline_origin: "subject-ready"
+  clock_source: "host-monotonic"
+
+topology:
+  profile: "dual-path-single-origin-v1"
+  logical_paths:
+    - id: "wifi"
+      role: "primary"
+      initial_state: "enabled"
+    - id: "mobile"
+      role: "alternate"
+      initial_state: "enabled"
+  control_plane_visible_to_subject: false
+  scenario_schedule_visible_to_subject: false
+  host_ports_published: false
+
+preconditions:
+  - id: "origin-reachable"
+    check: "origin.reachable"
+    target: "origin"
+    required: true
+
+  - id: "wifi-path-reachable"
+    check: "path.reachable"
+    target: "wifi"
+    required: true
+
+  - id: "mobile-path-reachable"
+    check: "path.reachable"
+    target: "mobile"
+    required: true
+
+  - id: "subject-ready"
+    check: "subject.health"
+    target: "subject"
+    required: true
+
+  - id: "replay-source-available"
+    check: "subject.replay-source-available"
+    target: "subject"
+    required: true
+    visibility: "opaque-public-reference-only"
+
+stimulus:
+  kind: "replay"
+  source: "subject-local-previously-accepted-artifact"
+  construction: "subject-local-opaque"
+  delivery_boundary: "public-adapter-command-v1"
+  harness_visibility: "metadata-only"
+  protected_payload_exported: false
+  protected_payload_logged: false
+
+stimulus_schedule:
+  - event_id: "replay-attempt-001"
+    at_seconds: 15
+    action: "subject.stimulus"
+    target: "subject"
+    kind: "replay"
+    witness_required: true
+    expected_public_verdict: "rejected-replay"
+    description: >-
+      Request one replay attempt using an opaque artifact linked to a
+      previously accepted public operation.
+
+observation_windows:
+  baseline:
+    begins_at: "subject-ready"
+    ends_at: "replay-attempt-001"
+    minimum_successful_progress_events: 5
+    required_original_acceptances: 1
+
+  rejection:
+    begins_at: "replay-attempt-001"
+    verdict_timeout_seconds: 10
+    required_rejection_events: 1
+    maximum_additional_acceptances_for_original_operation: 0
+
+  post_rejection:
+    begins_after: "replay-attempt-001"
+    ends_at: "run-complete"
+    minimum_successful_progress_events: 5
+    maximum_unplanned_path_transitions: 0
+
+acceptance:
+  contract: "../expected/invariant-contract.json"
+
+  required_invariants:
+    - "VRP-LAB-EVIDENCE-COMPLETE"
+    - "VRP-LAB-RUN-ID-CONSISTENT"
+    - "VRP-LAB-EVENT-SEQUENCE-MONOTONIC"
+    - "VRP-LAB-EVENT-ID-UNIQUE"
+    - "VRP-LAB-CONTINUITY-REFERENCE-STABLE"
+    - "VRP-LAB-REPLAY-SOURCE-OBSERVED"
+    - "VRP-LAB-REPLAY-REJECTED"
+    - "VRP-LAB-REPLAY-NO-DUPLICATE-MUTATION"
+    - "VRP-LAB-PROGRESS-PRESERVED"
+    - "VRP-LAB-NO-DUPLICATE-ACCEPTANCE"
+
+  parameters:
+    stimulus_event_id: "replay-attempt-001"
+    expected_public_verdict: "rejected-replay"
+    required_original_acceptances: 1
+    required_rejection_events: 1
+    maximum_total_acceptances_for_original_operation: 1
+    maximum_additional_acceptances_for_replay: 0
+    minimum_baseline_progress_events: 5
+    minimum_post_rejection_progress_events: 5
+    maximum_continuity_reference_count: 1
+    maximum_unplanned_path_transitions: 0
+    maximum_duplicate_accepted_mutations: 0
+
+evidence:
+  format: "public-evidence-v1"
+
+  required_subject_artifacts:
+    - "subject-evidence.json"
+    - "subject-events.jsonl"
+
+  required_subject_event_fields:
+    - "run_id"
+    - "event_sequence"
+    - "event_id"
+    - "event_kind"
+    - "related_witness_event_id"
+    - "public_operation_reference"
+    - "public_verdict"
+    - "observed_at_utc"
+
+  required_public_relationships:
+    - id: "replay-source-link"
+      source_field: "public_operation_reference"
+      requirement: >-
+        The replay rejection must reference the same opaque public operation
+        reference as the original accepted operation.
+
+  required_witness_events:
+    - "infrastructure.ready"
+    - "subject.ready"
+    - "stimulus.replay.requested"
+    - "stimulus.replay.delivered"
+    - "subject.completed"
+    - "run.completed"
+
+  prohibited_content:
+    raw_replay_artifacts: true
+    raw_protected_payloads: true
+    protected_operation_tokens: true
+    cryptographic_keys: true
+    credentials: true
+    raw_protected_packets: true
+    internal_replay_state: true
+    internal_runtime_state: true
+    proprietary_decision_traces: true
+    source_code_paths: true
+
+verdict_policy:
+  fail_closed: true
+  missing_required_evidence: "INCOMPLETE"
+  missing_replay_source_evidence: "INCOMPLETE"
+  replay_source_relationship_ambiguous: "INCOMPLETE"
+  stimulus_not_delivered: "INCOMPLETE"
+  infrastructure_failure: "INCOMPLETE"
+  unexpected_harness_error: "INCOMPLETE"
+  missing_public_rejection_verdict: "FAIL"
+  replay_recorded_as_accepted: "FAIL"
+  duplicate_acceptance_for_original_operation: "FAIL"
+  contradicted_invariant: "FAIL"
+  subject_failure_with_healthy_infrastructure: "FAIL"
+  all_required_invariants_satisfied: "PASS"
+
+limitations:
+  - >-
+    The harness records only an opaque public operation reference and never
+    receives the protected replay artifact or protected payload.
+  - >-
+    The scenario verifies behavior exposed by the authorized black-box
+    adapter and does not disclose the internal replay-detection mechanism.
+  - >-
+    A PASS result applies only to the supplied image, scenario snapshot,
+    invariant contract, and recorded execution environment.
+  - >-
+    The result is not a formal proof against every possible replay strategy
+    or transport-level duplication condition.
