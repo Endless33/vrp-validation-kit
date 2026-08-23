@@ -1,0 +1,42 @@
+{
+  "schema_version": "vrp-continuity-lab/run-manifest-v1",
+  "run_id": "replay-attempt-20260815t073311z-4d3f33e5",
+  "scenario_id": "replay-attempt",
+  "execution_state": "COMPLETE",
+  "execution_exit_code": 0,
+  "started_at_utc": "2026-08-15T07:33:13Z",
+  "completed_at_utc": "2026-08-15T07:34:15Z",
+  "project_name": "vrplab-replay-attempt-20260815t073311z-4d3f33e5",
+  "evidence_format": "public-evidence-v1",
+  "verification_required": true,
+  "artifacts": {
+    "scenario": {
+      "path": "input/scenario.yaml",
+      "sha256": "9116eda7e28793adc99c1621aecfb6fb3777a214e0f8d15bd2b3e4ee05485b76"
+    },
+    "schedule": {
+      "path": "input/schedule.tsv",
+      "sha256": "05ecc3b1937ca9239d9ae118df1e58f231a055927e53d580aaa443e0ac9229e1"
+    },
+    "invariant_contract": {
+      "path": "input/invariant-contract.json",
+      "sha256": "276c7dbdbcf95566fc86e4dee749d03185b8ad0fdcca55dc618f3a69b717594c"
+    },
+    "environment": {
+      "path": "witness/environment.json",
+      "sha256": "36741c55ee0ec235f2f37b2d97eb005a82296021715f2e1c38e86b49bcbc9e1c"
+    },
+    "witness_events": {
+      "path": "witness/events.jsonl",
+      "sha256": "9c0f198a11f481eef6aad7211debde6c759760105aa28836216461781cd76c02"
+    },
+    "subject_evidence": {
+      "path": "subject/subject-evidence.json",
+      "sha256": "a3bb8c4a94380f4fe63fd0a4f308f5169c6b859e6bc06d7ad573a125f27e9e94"
+    },
+    "subject_events": {
+      "path": "subject/subject-events.jsonl",
+      "sha256": "a7b9f9bcd56c6aa620f7dc421c08dd7daeb4576339ceee3a1e78ff2d2fe8c27f"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "schema_version": "vrp-continuity-lab/subject-evidence-v0",
+  "evidence_format": "public-evidence-v1",
+  "run_id": "replay-attempt-20260815t073311z-4d3f33e5",
+  "adapter": {
+    "public_id": "vrp-subject-mock",
+    "version": "1.0.0"
+  },
+  "started_at_utc": "2026-08-15T07:33:19Z",
+  "completed_at_utc": "2026-08-15T07:33:40Z",
+  "completion_state": "complete",
+  "public_verdict": "evidence-ready",
+  "continuity_reference": "mock-continuity-replay-attempt-20260815t073311z-4d3f33e5",
+  "final_active_path": "wifi",
+  "summary": {
+    "successful_progress_event_count": 10,
+    "path_transition_count": 0,
+    "accepted_mutation_count": 1,
+    "duplicate_accepted_mutation_count": 0,
+    "stale_authority_rejection_count": 0,
+    "replay_rejection_count": 1
+  }
+}
