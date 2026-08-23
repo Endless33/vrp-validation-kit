@@ -1,0 +1,100 @@
+{
+  "schema_version": "vrp-continuity-lab/verification-v1",
+  "run_id": "replay-attempt-20260815t073311z-4d3f33e5",
+  "scenario_id": "replay-attempt",
+  "verdict": "FAIL",
+  "generated_at_utc": "2026-08-23T08:28:09Z",
+  "inputs": {
+    "manifest_sha256": "b10f079be2bc72d3f8456d3d14f3a358585282098587a9ca9a144e92808d2f80",
+    "invariant_contract_sha256": "276c7dbdbcf95566fc86e4dee749d03185b8ad0fdcca55dc618f3a69b717594c",
+    "hash_mismatches": []
+  },
+  "checks": [
+    {
+      "invariant_id": "VRP-LAB-ARTIFACT-HASHES-MATCH",
+      "status": "PASS",
+      "message": "All manifest-bound artifact hashes match."
+    },
+    {
+      "invariant_id": "VRP-LAB-SCHEMA-COMPATIBLE",
+      "status": "PASS",
+      "message": "All public evidence schemas are compatible."
+    },
+    {
+      "invariant_id": "VRP-LAB-PROHIBITED-FIELDS-ABSENT",
+      "status": "PASS",
+      "message": "No prohibited subject-evidence fields were detected."
+    },
+    {
+      "invariant_id": "VRP-LAB-EVIDENCE-COUNTERS-CONSISTENT",
+      "status": "PASS",
+      "message": "Subject summary counters match the ordered public event stream."
+    },
+    {
+      "invariant_id": "VRP-LAB-CONTRACT-COVERAGE",
+      "status": "PASS",
+      "message": "Every required invariant is defined and supported."
+    },
+    {
+      "invariant_id": "VRP-LAB-EVIDENCE-COMPLETE",
+      "status": "PASS",
+      "message": "All required public evidence is complete."
+    },
+    {
+      "invariant_id": "VRP-LAB-RUN-ID-CONSISTENT",
+      "status": "PASS",
+      "message": "The run identifier is consistent across all evidence layers."
+    },
+    {
+      "invariant_id": "VRP-LAB-EVENT-SEQUENCE-MONOTONIC",
+      "status": "FAIL",
+      "message": "An event sequence is missing, duplicated, or out of order."
+    },
+    {
+      "invariant_id": "VRP-LAB-EVENT-ID-UNIQUE",
+      "status": "PASS",
+      "message": "Witness and subject event identifiers are unique."
+    },
+    {
+      "invariant_id": "VRP-LAB-CONTINUITY-REFERENCE-STABLE",
+      "status": "PASS",
+      "message": "Exactly one opaque public continuity reference was observed."
+    },
+    {
+      "invariant_id": "VRP-LAB-NO-DUPLICATE-ACCEPTANCE",
+      "status": "PASS",
+      "message": "No duplicate accepted mutation was observed."
+    },
+    {
+      "invariant_id": "VRP-LAB-REPLAY-SOURCE-OBSERVED",
+      "status": "PASS",
+      "message": "One prior accepted public operation was linked to the replay attempt."
+    },
+    {
+      "invariant_id": "VRP-LAB-REPLAY-REJECTED",
+      "status": "PASS",
+      "message": "The replay attempt received the required public rejection verdict."
+    },
+    {
+      "invariant_id": "VRP-LAB-REPLAY-NO-DUPLICATE-MUTATION",
+      "status": "PASS",
+      "message": "The replay attempt did not create an additional accepted mutation."
+    },
+    {
+      "invariant_id": "VRP-LAB-PROGRESS-PRESERVED",
+      "status": "PASS",
+      "message": "Healthy public workload progress continued after replay rejection."
+    }
+  ],
+  "summary": {
+    "pass": 14,
+    "fail": 1,
+    "incomplete": 0
+  },
+  "interpretation": {
+    "scope": "public-black-box-observations",
+    "internal_implementation_proven": false,
+    "production_readiness_proven": false,
+    "formal_verification_provided": false
+  }
+}
