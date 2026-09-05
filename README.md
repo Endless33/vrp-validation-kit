@@ -1,17 +1,3 @@
-⚠️ FINAL NOTICE — VRP PUBLIC ACCESS
-
-Core SDKs and runtime boundaries have already been moved to PRIVATE.
-
-Only selected evaluation, validation, and public evidence resources remain available.
-
-FINAL PUBLIC-ACCESS DEADLINE: 31 DECEMBER 2026, 23:59.
-
-Additional repositories and technical materials may be moved to PRIVATE before this deadline.
-
-Public today does not mean public forever.
-
----
-
 # VRP External Validation Kit
 
 Public engineering evaluation for observable VRP behavior, invariant preservation, adversarial conditions, and evidence verification.
