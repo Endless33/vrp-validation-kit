@@ -72,3 +72,17 @@ The goal is long-term engineering, reproducible validation, and continuous impro
 Engineering first.
 
 Proof before claims.
+
+## Timeline
+
+2025 — Initial architectural concept
+
+2025 — First private prototypes
+
+2026 — Public repositories
+
+2026 — Public validation framework
+
+2026 — Black-box validation methodology
+
+2026 — Pilot program
