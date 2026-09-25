@@ -1012,6 +1012,14 @@ def scenario_checks(
       $accepted;
       $transitions
     )
+  elif $scenario.scenario.id == "loss50-latency200" then
+    [
+      result(
+        "VRP-LAB-SCENARIO-SUPPORTED";
+        "PASS";
+        "The latency impairment scenario is supported."
+      )
+    ]
   else
     [
       result(

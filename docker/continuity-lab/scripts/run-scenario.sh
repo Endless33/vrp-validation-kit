@@ -514,6 +514,61 @@ wait_for_path_reachable() {
     done
 }
 
+
+apply_latency_toxic() {
+    local proxy="$1"
+    local latency="$2"
+    local jitter="${3:-0}"
+
+    local body
+    body="$(printf '{"name":"latency","type":"latency","stream":"downstream","toxicity":1.0,"attributes":{"latency":%s,"jitter":%s}}' \
+        "$latency" "$jitter")"
+
+    controller_call \
+        --max-time 5 \
+        --request POST \
+        --header "Content-Type: application/json" \
+        --data "${body}" \
+        "http://fault-engine:8474/proxies/${proxy}/toxics" \
+        >/dev/null
+}
+
+apply_timeout_toxic() {
+    local proxy="$1"
+    local timeout_ms="$2"
+
+    local body
+    body="$(printf '{"name":"timeout","type":"timeout","stream":"downstream","toxicity":1.0,"attributes":{"timeout":%s}}' \
+        "$timeout_ms")"
+
+    controller_call \
+        --max-time 5 \
+        --request POST \
+        --header "Content-Type: application/json" \
+        --data "${body}" \
+        "http://fault-engine:8474/proxies/${proxy}/toxics" \
+        >/dev/null
+}
+
+remove_toxic() {
+    local proxy="$1"
+    local toxic="$2"
+
+    controller_call \
+        --max-time 5 \
+        --request DELETE \
+        "http://fault-engine:8474/proxies/${proxy}/toxics/${toxic}" \
+        >/dev/null 2>&1 || true
+}
+
+list_toxics() {
+    local proxy="$1"
+
+    controller_call \
+        --max-time 5 \
+        "http://fault-engine:8474/proxies/${proxy}"
+}
+
 set_path_state() {
     local path_id="$1"
     local enabled="$2"
@@ -774,6 +829,31 @@ execute_scheduled_event() {
             else
                 echo "[TRACE] blackout-end: IF SKIPPED scenario=${SCENARIO_ID}" >&2
             fi
+            ;;
+
+        network.toxic.add)
+            apply_latency_toxic \
+                "$(path_proxy_name "${target}")" \
+                200 \
+                0
+
+            record_event \
+                "network.toxic.added" \
+                "${event_id}" \
+                "${target}" \
+                "confirmed"
+            ;;
+
+        network.toxic.remove)
+            remove_toxic \
+                "$(path_proxy_name "${target}")" \
+                "latency"
+
+            record_event \
+                "network.toxic.removed" \
+                "${event_id}" \
+                "${target}" \
+                "confirmed"
             ;;
 
         subject.stimulus)
@@ -1095,6 +1175,12 @@ for ((event_index = 0; event_index < EVENT_COUNT; event_index++)); do
             [[ "${EVENT_TARGETS}" == "wifi,mobile" ||
                 "${EVENT_TARGETS}" == "mobile,wifi" ]] ||
                 die "Multi-path action must target wifi and mobile"
+            ;;
+
+        network.toxic.add | network.toxic.remove)
+            [[ "${EVENT_TARGET}" == "wifi" ||
+                "${EVENT_TARGET}" == "mobile" ]] ||
+                die "Network toxic action requires wifi or mobile target"
             ;;
 
         subject.stimulus)
