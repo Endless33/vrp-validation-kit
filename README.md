@@ -22,7 +22,7 @@ https://tally.so/r/ZjQLN0
 
 ---
 
-## Purpose
+# Purpose
 
 The VRP External Validation Kit provides public tools for evaluating declared VRP behavior without publishing the protected runtime implementation.
 
@@ -46,19 +46,21 @@ The objective is reproducible evaluation.
 
 ---
 
-## Evaluation Boundary
+# Evaluation Boundary
 
 This repository contains public validation models, adversarial scenarios, evidence verifiers, documentation, and a Docker-based black-box evaluation harness.
 
-It does not contain the production VRP runtime.
+It does **not** contain the production VRP runtime.
 
-The standalone Go programs model and test declared public invariants. They do not execute or disclose the protected runtime.
+The standalone Go programs model and test declared public invariants.
+
+They do **not** execute or disclose the protected runtime.
 
 The Docker Continuity Evidence Lab evaluates a separately supplied authorized black-box subject image through a public adapter contract.
 
 A successful public verdict establishes only that the declared observable conditions were satisfied during the evaluated scenario.
 
-It does not independently prove:
+It does **not** independently prove:
 
 - the internal implementation used;
 - formal protocol correctness;
@@ -70,794 +72,654 @@ It does not independently prove:
 
 ---
 
-## Release Boundary
+# Release Boundary
 
 | Reference | Scope | Intended Use |
-|---|---|---|
+|------------|-------|--------------|
 | `v1.0.0` | Baseline Go validation harness, runtime-behavior scenario, and attack suite | Stable baseline reproduction |
-| `main` | Current validation work, evidence verification, extended documentation, Docker Continuity Evidence Lab, and release-closeout records | Current engineering evaluation |
+| `main` | Current validation work, evidence verification, Docker Continuity Evidence Lab, release-closeout records and extended documentation | Current engineering evaluation |
 
-The Docker Continuity Evidence Lab and newer evidence-verification components were added after the `v1.0.0` release.
+The Docker Continuity Evidence Lab and evidence-verification components were introduced after the `v1.0.0` release.
 
-Use the exact commit hash when reporting results from `main`.
+When reporting results from `main`, always include the exact evaluated commit hash.
 
 ---
 
-## Current Status
+# Current Status
 
 The current repository state includes:
 
 - public Go validation commands;
-- an external adversarial model suite;
+- external adversarial model suite;
 - evidence-bundle verification;
 - evidence tamper rejection;
-- four Docker continuity scenarios;
-- a versioned public invariant contract;
-- deterministic Docker evidence verification;
+- Docker Continuity Evidence Lab;
+- five public Docker scenarios;
+- versioned public invariant contract;
+- deterministic evidence verification;
 - report export tooling;
 - participant and protected-runtime boundaries;
-- release-closeout documentation;
-- black-box boundary audit records;
-- validation-result records;
-- validation-fix history;
-- Pilot-readiness documentation.
+- validation records;
+- black-box boundary audit;
+- Pilot documentation.
 
-The Docker lab files have passed static repository checks, including:
+The Docker lab files have passed repository validation including:
 
 - Bash syntax validation;
-- YAML and JSON parsing;
+- YAML validation;
+- JSON validation;
 - contract-reference validation;
-- executable-mode validation;
+- executable-bit validation;
 - relative-link validation;
 - public-boundary scanning.
 
-The Docker Continuity Evidence Lab has also completed a controlled black-box `blackout-recovery` validation run with a final verifier verdict of:
+The Docker Continuity Evidence Lab has completed controlled black-box validation runs including:
 
-`PASS`
+- Wi-Fi → Mobile migration;
+- Blackout Recovery;
+- Replay Attempt;
+- Stale Authority;
+- 200 ms Latency Impairment.
 
-The completed run demonstrated a bounded dual-path blackout, restoration through the alternate logical path, stable public continuity reference, resumed progress, internally consistent public evidence, and successful PASS evidence export.
+Executed scenarios produce deterministic public evidence and are verified through the public verifier.
 
-The release-closeout validation additionally corrected the verifier's logical-path transition semantics so that observable transitions are derived from the ordered public event stream rather than requiring a synthetic transition event not emitted by the subject evidence model.
+Each successful validation applies only to:
 
-This result applies only to the executed scenario, evaluated repository state, supplied black-box subject, invariant contract, and recorded environment.
+- the evaluated repository state;
+- the executed scenario;
+- the supplied authorized black-box subject;
+- the declared invariant contract;
+- the recorded execution environment.
 
-It does not establish universal production readiness or prove properties outside the declared public validation boundary.
+It does **not** establish:
+
+- universal production readiness;
+- formal protocol verification;
+- correctness outside the executed scenario;
+- certification by any third party.
 
 ---
 
-## Release and Pilot Status
+# Release and Pilot Status
 
 The current public validation boundary has completed release closeout.
 
-The closeout records the final public validation state, black-box disclosure boundary, executed validation results, verifier corrections, and readiness of the evaluation path for controlled Pilot use.
+Current release documentation:
 
-Current release-closeout documentation:
+- Release Closeout
+- Black-Box Boundary Audit
+- Validation Results
+- Validation Fix History
+- Pilot Readiness
 
-- [Release Closeout](docs/release/RELEASE_CLOSEOUT_2026-08-15.md)
-- [Black-Box Boundary Audit](docs/release/BLACK_BOX_BOUNDARY_AUDIT.md)
-- [Validation Results](docs/release/VALIDATION_RESULTS_2026-08-15.md)
-- [Validation Fix History](docs/release/FIX_HISTORY_2026-08-15.md)
-- [Pilot Readiness](docs/release/PILOT_READINESS.md)
+The public evaluation boundary exposes:
 
-The validated public boundary preserves the separation between observable evidence and the protected VRP implementation.
-
-Public evaluation may expose:
-
-- declared scenario configuration;
-- externally controlled fault boundaries;
+- declared scenarios;
+- externally controlled fault injection;
 - logical path observations;
 - opaque continuity references;
-- public progress events;
-- public mutation and rejection verdicts;
 - witness evidence;
-- verification results;
-- report manifests and artifact hashes.
+- public subject evidence;
+- verification reports;
+- artifact hashes.
 
-It does not require disclosure of:
+The public evaluation boundary does **not** expose:
 
-- protected VRP runtime source code;
-- proprietary authority logic;
-- private runtime state;
-- internal decision parameters;
+- protected runtime source code;
+- authority implementation;
+- internal runtime state;
+- decision algorithms;
 - cryptographic secrets;
 - private keys;
 - bearer material;
-- protected packet payloads;
+- protected packets;
 - production credentials.
 
-The final release-closeout validation established a successful public black-box verification path, including evidence verification and PASS evidence export.
-
-This status applies only to the declared public evaluation boundary and executed scenarios.
-
-It does not claim formal verification, universal production readiness, certification, or proof of behavior outside the tested conditions.
-
-For reproducibility, external reports against the current `main` branch should record the exact repository commit used for evaluation.
+The public repository evaluates externally observable behavior only.
 
 ---
 
-## Requirements
+# Requirements
 
-### Standalone Validation
+## Standalone Validation
 
-- Git;
-- Go 1.24 or later.
-
-### Docker Continuity Evidence Lab
-
-- Linux Docker host;
-- Docker Engine;
-- Docker Compose v2;
-- Bash;
-- `sha256sum`;
-- Linux bridge-network support;
-- an authorized black-box subject image.
-
-The protected subject image is supplied separately through an approved delivery channel.
-
-It is not included in this repository.
-
-Android Termux can be used for repository inspection and static validation, but the Docker lab requires a Docker-capable Linux host.
-
----
-
-## Quick Evaluation
-
-Clone the current repository:
-
-    git clone https://github.com/Endless33/vrp-validation-kit.git
-    cd vrp-validation-kit
-
-Record the evaluated commit:
-
-    git rev-parse HEAD
-
-To reproduce the stable baseline instead:
-
-    git checkout v1.0.0
-
----
-
-## Validation Harness
-
-Execute:
-
-    go run ./cmd/vrp-test
-
-Expected final result:
-
-    FINAL_VERDICT=VALIDATION_PASSED
-
-This command evaluates the baseline public validation model.
-
----
-
-## Runtime-Behavior Scenario
-
-Execute:
-
-    go run ./cmd/vrp-runtime-scenario
-
-Expected final result:
-
-    FINAL_VERDICT=CONTINUITY_PRESERVED
-
-This is a public runtime-behavior scenario.
-
-It is not the protected production runtime.
-
----
-
-## External Adversarial Model Suite
-
-Execute:
-
-    go run ./cmd/attack-suite
-
-Expected final result:
-
-    FINAL_VERDICT=ATTACK_SUITE_PASSED
-
-The suite attempts to violate declared invariants in the standalone public model.
-
-It is not a penetration test against the protected runtime, a production deployment, or an external network.
-
-### Current Scenarios
-
-- Replay Storm
-- Duplicate Commit
-- Authority Rollback
-- Epoch Rollback
-- Authority Race
-- Transport Migration Storm
-- Runtime Recovery
-- Canonical History Rewrite
-
-### Expected Verdicts
-
-- `REPLAY_WINDOW_ENFORCED`
-- `DUPLICATE_COMMIT_REJECTED`
-- `AUTHORITY_ROLLBACK_REJECTED`
-- `STALE_EPOCH_REJECTED`
-- `AUTHORITY_RACE_RESOLVED`
-- `TRANSPORT_MIGRATION_PRESERVED`
-- `SESSION_RECOVERY_PRESERVED`
-- `CANONICAL_HISTORY_REWRITE_REJECTED`
-
----
-
-## Evidence Verification
-
-Evidence verification is available on the current `main` branch.
-
-Execute:
-
-    go run ./cmd/evidence-verify \
-      --file evidence/sample/core-evidence.json
-
-Expected final result:
-
-    FINAL_VERDICT=EVIDENCE_VERIFIED
-
-The verifier checks the public evidence structure and recomputes the declared evidence hash.
-
----
-
-## Tamper Rejection
-
-Execute:
-
-    go run ./cmd/evidence-verify \
-      --file evidence/sample/tampered-evidence.json
-
-Expected final result:
-
-    FINAL_VERDICT=EVIDENCE_VERIFY_FAILED
-
-A non-zero process exit is expected for the tampered sample.
-
-Tampered evidence must not be converted into a successful result.
-
----
+- Git
+- Go 1.24+
 
 ## Docker Continuity Evidence Lab
 
-The Docker Continuity Evidence Lab is located at:
+- Linux
+- Docker Engine
+- Docker Compose v2
+- Bash
+- sha256sum
+- Linux bridge networking
+- Authorized subject image
 
-    docker/continuity-lab/
+The protected subject image is supplied separately.
 
-It provides a controlled black-box environment with:
+It is **not** included in this repository.
 
-- two isolated logical data paths;
-- a controlled origin;
-- a harness-controlled fault engine;
-- independent witness-event recording;
-- subject-only evidence output;
-- a versioned invariant contract;
-- deterministic verification;
-- report export.
-
-Docker creates the controlled environment.
-
-Docker does not implement VRP and does not decide whether continuity was preserved.
-
-### Available Scenarios
-
-    docker/continuity-lab/configs/wifi-to-mobile.yaml
-    docker/continuity-lab/configs/blackout-recovery.yaml
-    docker/continuity-lab/configs/stale-authority.yaml
-    docker/continuity-lab/configs/replay-attempt.yaml
-
-The scenarios evaluate:
-
-- primary-to-alternate path transition;
-- bounded total-path blackout and recovery;
-- stale-authority rejection;
-- replay rejection.
-
-The logical names `wifi` and `mobile` are controlled evaluation labels.
-
-They do not emulate complete Wi-Fi radio, cellular handover, modem, carrier, or mobile-core behavior.
+Android Termux can inspect the repository and execute standalone validation, but the Docker Continuity Evidence Lab requires a Docker-capable Linux host.
 
 ---
 
-## Black-Box Subject Boundary
+# Quick Evaluation
 
-The subject must be supplied as an authorized container image.
+Clone the repository:
 
-The default public adapter entrypoint is:
+```bash
+git clone https://github.com/Endless33/vrp-validation-kit.git
 
-    /vrp-lab-adapter
+cd vrp-validation-kit
+```
 
-The adapter supports:
+Record the evaluated commit:
 
-    /vrp-lab-adapter run
-    /vrp-lab-adapter health
-    /vrp-lab-adapter stimulus --kind <kind> --event-id <event-id>
+```bash
+git rev-parse HEAD
+```
 
-The adapter must export only public evidence.
+To reproduce the stable release instead:
 
-It must not export:
+```bash
+git checkout v1.0.0
+```
 
-- protected runtime source code;
-- private keys;
-- bearer tokens;
-- protected packets;
-- internal memory addresses;
-- proprietary state;
-- private decision parameters;
-- internal stack traces.
+Continue with one of:
 
-See:
+- Standalone Validation Harness
+- Runtime Behavior Scenario
+- Attack Suite
+- Docker Continuity Evidence Lab
 
-- [Black-Box Boundary Audit](docs/release/BLACK_BOX_BOUNDARY_AUDIT.md)
-- [Participant Boundary](docs/evaluation/PARTICIPANT_BOUNDARY.md)
+- ---
+
+# Standalone Validation
+
+The standalone validation commands execute the public validation model directly.
+
+No protected runtime is required.
+
+Run the complete validation suite:
+
+```bash
+go test ./...
+```
+
+Run the runtime behavior scenario:
+
+```bash
+go run ./cmd/runtime-behavior
+```
+
+Run the attack suite:
+
+```bash
+go run ./cmd/attack-suite
+```
+
+Expected result:
+
+```
+FINAL_VERDICT=PASS
+```
 
 ---
 
-## Running a Scenario
+# Docker Continuity Evidence Lab
 
-Change to the lab directory:
+The Docker Continuity Evidence Lab evaluates an **authorized black-box subject** through an evidence-only public interface.
 
-    cd docker/continuity-lab
+The lab controls only:
 
-Set the authorized subject image:
+- network topology;
+- logical path availability;
+- public stimuli;
+- witness observations;
+- public evidence;
+- invariant verification.
 
-    export VRP_LAB_SUBJECT_IMAGE='registry.example/authorized-subject@sha256:<digest>'
+The lab never accesses:
 
-Set the subject-output ownership identity:
-
-    export VRP_LAB_SUBJECT_UID="$(id -u)"
-    export VRP_LAB_SUBJECT_GID="$(id -g)"
-
-Run the first scenario:
-
-    ./scripts/run-scenario.sh configs/wifi-to-mobile.yaml
-
-The runner prints the generated run identifier and exact output directory.
+- runtime memory;
+- authority implementation;
+- protocol internals;
+- recovery algorithms;
+- source code.
 
 ---
 
-## Verifying Docker Evidence
+# Public Scenarios
 
-After the scenario completes:
+The repository currently includes five public scenarios.
 
-    ./scripts/verify-evidence.sh out/<run-id>
+| Scenario | Purpose |
+|-----------|---------|
+| wifi-to-mobile | Logical path migration |
+| blackout-recovery | Recovery after complete connectivity loss |
+| replay-attempt | Replay rejection |
+| stale-authority | Authority freshness validation |
+| loss50-latency200 | Latency impairment using Toxiproxy |
 
-Verification checks include:
+---
 
-- required artifact presence;
+# Latency Impairment Scenario
+
+Scenario:
+
+```
+docker/continuity-lab/configs/loss50-latency200.yaml
+```
+
+Purpose:
+
+Inject deterministic latency through the public Docker proxy layer while evaluating externally observable continuity behavior.
+
+The scenario injects:
+
+- 200 ms downstream latency
+- Wi-Fi logical path
+- deterministic timing
+- public witness evidence
+
+The protected runtime remains completely opaque.
+
+---
+
+# Running the Docker Lab
+
+Select an authorized subject image.
+
+Example:
+
+```bash
+export VRP_LAB_SUBJECT_IMAGE=vrp-subject-local:test
+```
+
+Run the scenario:
+
+```bash
+./docker/continuity-lab/scripts/run-scenario.sh \
+docker/continuity-lab/configs/loss50-latency200.yaml
+```
+
+Expected output:
+
+```
+RUN_STATE=COMPLETE
+VERIFICATION_REQUIRED=true
+```
+
+Verify evidence:
+
+```bash
+./docker/continuity-lab/scripts/verify-evidence.sh \
+docker/continuity-lab/out/<RUN_ID>
+```
+
+Expected verification:
+
+```
+VERDICT=PASS
+```
+
+---
+
+# Observable Events
+
+The latency scenario records public witness events including:
+
+```
+infrastructure.ready
+subject.ready
+network.toxic.added
+network.toxic.removed
+subject.completed
+run.completed
+```
+
+No protected runtime information is exposed.
+
+---
+
+# Evidence Produced
+
+Each successful run generates:
+
+```
+manifest.json
+
+verification.json
+
+subject/
+    subject-events.jsonl
+    subject-evidence.json
+
+witness/
+    events.jsonl
+    environment.json
+```
+
+The verifier validates:
+
+- artifact hashes;
 - schema compatibility;
-- run-identifier consistency;
-- JSON and JSONL validity;
-- monotonic event sequencing;
-- unique public event identifiers;
-- scenario-to-witness consistency;
-- subject-to-witness consistency;
-- public invariant evaluation;
-- artifact hashes;
-- fail-closed handling of incomplete evidence;
-- consistency between declared evidence counters and observed public events;
-- logical-path transition derivation from the public event stream.
-
-The verifier evaluates public evidence only.
-
-It does not inspect protected runtime internals.
+- invariant contract;
+- witness ordering;
+- continuity-reference stability;
+- duplicate rejection;
+- public evidence completeness.
 
 ---
 
-## Exporting a Report
+# Example Result
 
-After verification:
+Typical successful verification:
 
-    ./scripts/export-report.sh out/<run-id>
+```
+VERDICT=PASS
 
-The exported package contains:
+PASS:
+✓ Artifact hashes
 
-- scenario snapshot;
-- invariant-contract snapshot;
-- witness events;
-- subject evidence;
-- environment metadata;
-- verification result;
-- artifact hashes;
-- human-readable report.
+✓ Evidence complete
 
-Export does not add protected runtime material.
+✓ Event ordering
 
----
+✓ Continuity reference stable
 
-## Docker Verdicts
+✓ No duplicate acceptance
 
-The Docker lab uses three verdict classes:
+✓ Scenario supported
+```
 
-- `PASS` — all required public observations were present and consistent;
-- `FAIL` — one or more observations contradicted the public contract;
-- `INCOMPLETE` — the evidence was insufficient for a valid decision.
+The verification result applies only to the executed scenario and the evaluated black-box subject.
 
-Missing evidence is never inferred.
-
-A subject-generated success statement cannot override contradictory witness evidence.
+It does not disclose or prove the protected implementation.
 
 ---
 
-## Run Output
+# Design Philosophy
 
-Each run receives an isolated directory:
+The public validation boundary is intentionally limited.
 
-    docker/continuity-lab/out/<run-id>/
+The repository demonstrates **observable behavior**, not implementation details.
 
-Generated run output must remain untracked unless a reviewed and explicitly approved evidence package is selected for publication.
+Every engineering claim is expected to be reproducible through public evidence.
 
-Do not commit private registry information, protected runtime material, credentials, participant-confidential data, or unreviewed evidence.
+Protected implementation details remain outside the evaluation boundary.
 
----
-
-## Formal Evaluation
-
-Formal evaluation should use immutable digest-qualified references for:
-
-- the subject image;
-- the origin image;
-- the fault-engine image;
-- the relay image;
-- the controller image;
-- parser images.
-
-Retain image-delivery and authorization records outside the public repository.
-
-See the complete lab documentation:
-
-- [Docker Continuity Lab README](docker/continuity-lab/README.md)
-- [Docker Evidence Lab Architecture](docs/evaluation/VRP_DOCKER_EVIDENCE_LAB.md)
-- [Acceptance Criteria](docs/evaluation/ACCEPTANCE_CRITERIA.md)
-- [Participant Boundary](docs/evaluation/PARTICIPANT_BOUNDARY.md)
-- [Shadow Validation Sprint](docs/evaluation/SHADOW_VALIDATION_SPRINT.md)
+This separation is a deliberate architectural property rather than a limitation.
 
 ---
 
-## Validation Coverage
+# Reporting Issues
 
-Current public validation coverage includes:
+Bug reports are welcome.
 
-- replay containment;
-- duplicate-commit rejection;
-- authority rollback rejection;
-- epoch rollback rejection;
-- authority-race resolution;
-- runtime-recovery preservation;
-- transport-migration preservation;
-- canonical-history protection;
-- evidence-bundle verification;
-- evidence tamper detection;
-- scenario-bound witness evidence;
-- fail-closed incomplete-evidence handling;
-- black-box Docker evaluation contracts;
-- evidence-counter consistency;
-- logical-path transition reconstruction.
+Please include:
 
-Coverage describes what the public tools are designed to evaluate.
+- evaluated commit hash;
+- scenario name;
+- operating system;
+- Docker version;
+- verifier output;
+- verification.json;
+- manifest.json;
+- witness events.
 
-It must not be interpreted as proof of properties that were not executed and recorded.
+Do not include:
+
+- production credentials;
+- protected runtime artifacts;
+- proprietary source code.
 
 ---
 
-## Release Validation Record
+# Contact
 
-The release-closeout process records the validation work performed against the current public boundary.
+Pilot:
 
-The release documentation separates:
+jumpingvpn@proton.me
 
-1. what was executed;
-2. what initially failed;
-3. what was determined to be harness/verifier behavior rather than protected-runtime behavior;
-4. what was corrected;
-5. what subsequently passed;
-6. what remains explicitly outside the public proof boundary.
+Repository:
 
-The final verifier correction derives observable logical-path transitions from the ordered public event stream rather than requiring a synthetic `path-transition` event that was not part of the subject's emitted evidence model.
-
-This preserves the architectural boundary:
-
-    protected runtime
-            |
-            v
-    black-box adapter
-            |
-            v
-    public subject evidence
-            |
-            v
-    independent witness evidence
-            |
-            v
-    public invariant verifier
-            |
-            v
-    PASS / FAIL / INCOMPLETE
-
-The verifier evaluates externally observable evidence.
-
-It does not require disclosure of the protected runtime's internal transition mechanism.
-
-Full records:
-
-- [Release Closeout](docs/release/RELEASE_CLOSEOUT_2026-08-15.md)
-- [Validation Results](docs/release/VALIDATION_RESULTS_2026-08-15.md)
-- [Validation Fix History](docs/release/FIX_HISTORY_2026-08-15.md)
+https://github.com/Endless33/vrp-validation-kit
 
 ---
 
-## Tested Environments
+# Public Evaluation Model
 
-The standalone Go validation commands have been reproduced on:
+The Docker Continuity Evidence Lab is intentionally deterministic.
 
-- Windows 11;
-- Oracle Linux;
-- Android Termux.
+Every execution follows the same evaluation pipeline:
 
-The same declared final verdicts were observed for those standalone commands across the listed environments.
+```
+Scenario
+      │
+      ▼
+Infrastructure
+      │
+      ▼
+Authorized Subject
+      │
+      ▼
+Public Witness
+      │
+      ▼
+Evidence Collection
+      │
+      ▼
+Verification
+      │
+      ▼
+PASS / FAIL / INCOMPLETE
+```
 
-This statement does not claim that the Docker Continuity Evidence Lab has been executed on Android Termux.
+No manual interpretation is required.
 
-Docker results must identify their own host, Docker version, Compose version, image identities, scenario snapshot, contract digest, and commit hash.
+The verifier evaluates only observable evidence.
 
 ---
 
-## External Review Workflow
+# Public Boundary
 
-Recommended baseline workflow:
+The evaluation boundary intentionally excludes:
+
+- protocol implementation;
+- authority algorithms;
+- session management logic;
+- routing decisions;
+- protected state;
+- cryptographic material;
+- runtime memory.
+
+Only externally observable behavior is evaluated.
+
+---
+
+# What PASS Means
+
+A successful PASS means that the executed black-box subject satisfied every declared public invariant for the executed scenario.
+
+PASS does **not** mean:
+
+- formal verification;
+- production certification;
+- security certification;
+- disclosure of implementation;
+- proof of every possible failure mode.
+
+PASS means only that the observable evidence matches the declared public contract.
+
+---
+
+# What FAIL Means
+
+A FAIL verdict indicates that one or more required public invariants were violated.
+
+Examples include:
+
+- missing required evidence;
+- duplicate acceptance;
+- unexpected continuity reference replacement;
+- invalid event ordering;
+- required witness events not observed;
+- scenario-specific invariant violations.
+
+---
+
+# What INCOMPLETE Means
+
+INCOMPLETE indicates that the evaluation could not reach a valid conclusion.
+
+Examples include:
+
+- infrastructure failure;
+- incomplete evidence;
+- interrupted execution;
+- unsupported scenario;
+- verifier interruption.
+
+INCOMPLETE is intentionally different from FAIL.
+
+---
+
+# Deterministic Verification
+
+The verifier performs deterministic validation.
+
+Running the verifier repeatedly against identical evidence should produce identical results.
+
+Example:
+
+```bash
+./docker/continuity-lab/scripts/verify-evidence.sh \
+docker/continuity-lab/out/<RUN_ID>
+```
+
+Repeated execution should generate the same:
+
+- verdict;
+- invariant results;
+- evidence hashes.
+
+---
+
+# Reproducibility
+
+The public evaluation model is designed for independent verification.
+
+Any evaluator should be able to:
 
 1. Clone the repository.
-2. Record the commit hash or check out `v1.0.0`.
-3. Read this README.
-4. Read the validation limits and security boundary.
-5. Execute the public validation harness.
-6. Execute the runtime-behavior scenario.
-7. Execute the adversarial model suite.
-8. Execute evidence verification when using `main`.
-9. Execute tamper rejection when using `main`.
-10. Review the emitted verdicts.
-11. Review the source and documentation.
-12. Modify one assumption at a time.
-13. Preserve the diff.
-14. Report the exact observed result.
+2. Build the evaluation environment.
+3. Execute a published scenario.
+4. Collect evidence.
+5. Run the verifier.
+6. Compare results.
 
-For Docker evaluation:
-
-1. Use a Docker-capable Linux host.
-2. Record the host and Docker environment.
-3. Use an authorized subject-image digest.
-4. Run one declared scenario.
-5. Preserve the complete run directory.
-6. Verify the evidence.
-7. Export the report.
-8. Retain all hashes and immutable identities.
-9. Report any divergence without rewriting the original artifacts.
+No internal engineering knowledge is required.
 
 ---
 
-## Reproducibility Rules
+# Security Model
 
-When reporting a result, include:
+The public evaluation environment follows a strict separation principle.
 
-- repository commit hash or release tag;
-- exact command;
-- complete final verdict;
-- operating system and architecture;
-- Go version when applicable;
-- Docker and Compose versions when applicable;
-- scenario identifier;
-- subject-image digest when applicable;
-- relevant environment configuration;
-- local source diff;
-- expected behavior;
-- actual behavior.
+Public:
 
-Do not combine artifacts from different runs.
+- Docker topology;
+- witness events;
+- evidence format;
+- invariant contracts;
+- verification logic.
 
-Do not reuse run identifiers.
+Protected:
 
-Do not modify evidence and present it as original output.
+- runtime implementation;
+- protocol algorithms;
+- authority mechanisms;
+- continuity engine;
+- recovery implementation.
 
-Do not omit a failing exit status.
+The evaluation framework never crosses this boundary.
 
 ---
 
-## Reporting Issues
+# Intended Audience
 
-Use GitHub Issues for reproducible public findings:
+The repository is intended for:
 
-https://github.com/Endless33/vrp-validation-kit/issues
+- protocol engineers;
+- systems engineers;
+- distributed systems researchers;
+- infrastructure architects;
+- security engineers;
+- technical evaluators.
 
-If you modify the repository, include the diff.
-
-If an unmodified command fails, provide:
-
-- exact command;
-- complete output;
-- environment;
-- commit hash or release tag;
-- failure case attempted;
-- expected verdict;
-- actual verdict.
-
-Before publishing evidence, remove credentials, private registry references, participant-confidential data, and unrelated host information.
-
-Independent criticism is more valuable than agreement.
+It is not intended to teach or expose protected implementation details.
 
 ---
 
-## What Is Included
+# Repository Goals
 
-- public validation harness;
-- public runtime-behavior scenario;
-- external adversarial model suite;
-- evidence verifier;
-- tampered evidence sample;
-- Docker continuity harness;
-- four controlled Docker scenarios;
-- public invariant contract;
-- witness and subject evidence contracts;
-- deterministic verification scripts;
-- report export tooling;
-- validation and failure-model documentation;
-- participant-boundary documentation;
-- pilot documentation;
-- evaluation artifacts;
-- release-closeout records;
-- black-box boundary audit;
-- validation-result record;
-- verifier-fix history;
-- Pilot-readiness record.
+This repository exists to demonstrate:
+
+- reproducible evaluation;
+- deterministic verification;
+- black-box validation;
+- evidence-first engineering;
+- public invariant contracts.
+
+The repository is **not** a reference implementation of the protected runtime.
 
 ---
 
-## What Is Not Included
+# License
 
-This repository does not contain:
+Unless stated otherwise, repository contents are provided under the license included with the project.
 
-- production VRP runtime;
-- protected runtime source code;
-- proprietary authority logic;
-- internal decision mathematics;
-- private state representation;
-- production cryptographic material;
-- customer-specific deployments;
-- participant credentials;
-- authorized subject images;
-- private registry credentials;
-- protected implementation mechanisms.
+The evaluation framework is public.
 
-The repository explains how declared behavior can be evaluated.
-
-It does not disclose how the protected runtime implements that behavior.
-
-See:
-
-- [Validation Limits](docs/VALIDATION_LIMITS.md)
-- [Known Limitations](docs/KNOWN_LIMITATIONS.md)
-- [Security Model](docs/SECURITY_MODEL.md)
-- [What Is Not Included](docs/WHAT_IS_NOT_INCLUDED.md)
-- [Black-Box Boundary Audit](docs/release/BLACK_BOX_BOUNDARY_AUDIT.md)
+Protected runtime implementation remains private.
 
 ---
 
-## Documentation
+# Contributing
 
-Recommended entry points:
+Contributions improving the public evaluation framework are welcome.
 
-- [Public Pilot Deployment Guide](docs/PUBLIC_PILOT_DEPLOYMENT_GUIDE.md)
-- [External Validation Guide](docs/EXTERNAL_VALIDATION_GUIDE.md)
-- [Validation Model](docs/VALIDATION_MODEL.md)
-- [Evidence Specification](docs/EVIDENCE_SPECIFICATION.md)
-- [Failure Model](docs/FAILURE_MODEL.md)
-- [Failure-to-Invariant Mapping](docs/FAILURE_INVARIANT_MAPPING.md)
-- [Reproducibility Guide](docs/REPRODUCIBILITY_GUIDE.md)
-- [Architecture Decisions](docs/ARCHITECTURE_DECISIONS.md)
-- [Project Principles](docs/PROJECT_PRINCIPLES.md)
-- [Project Lineage](docs/PROJECT_LINEAGE.md)
+Examples include:
 
-### Release Documentation
+- additional public scenarios;
+- verifier improvements;
+- documentation;
+- reproducibility improvements;
+- Docker infrastructure;
+- evidence tooling.
 
-- [Release Closeout — 2026-08-15](docs/release/RELEASE_CLOSEOUT_2026-08-15.md)
-- [Black-Box Boundary Audit](docs/release/BLACK_BOX_BOUNDARY_AUDIT.md)
-- [Validation Results — 2026-08-15](docs/release/VALIDATION_RESULTS_2026-08-15.md)
-- [Validation Fix History — 2026-08-15](docs/release/FIX_HISTORY_2026-08-15.md)
-- [Pilot Readiness](docs/release/PILOT_READINESS.md)
+Contributions must not introduce:
+
+- proprietary runtime code;
+- protected algorithms;
+- confidential implementation details;
+- production credentials.
 
 ---
 
-## Pilot
+# Final Notes
 
-The public validation kit is an evaluation boundary, not a transfer of the protected runtime.
+The purpose of this repository is simple:
 
-Pilot participation requires separate review, authorization, and agreement.
+- evaluate observable behavior;
+- reproduce published results;
+- verify evidence independently;
+- preserve implementation confidentiality.
 
-Application:
+Evidence is public.
 
-https://tally.so/r/ZjQLN0
+Behavior is reproducible.
 
-Public pilot documentation:
-
-- [Pilot Program](docs/pilot/PILOT_PROGRAM.md)
-- [Pilot Boundary Overview](docs/pilot/PILOT_BOUNDARY_OVERVIEW.md)
-- [Integration Path](docs/pilot/INTEGRATION_PATH.md)
-
-### Pilot Readiness
-
-The current public validation boundary has completed its release-closeout process.
-
-The Pilot boundary is documented separately from the protected implementation and is intended to preserve the following separation:
-
-    PUBLIC
-    contracts
-    scenarios
-    adapter interface
-    observable evidence
-    witness evidence
-    verification
-    reports
-    acceptance criteria
-
-            |
-            | black-box boundary
-            v
-
-    PROTECTED
-    production runtime
-    protocol internals
-    authority mechanisms
-    private state
-    decision algorithms
-    cryptographic internals
-    implementation strategy
-
-See:
-
-[Pilot Readiness](docs/release/PILOT_READINESS.md)
-
----
-
-## Challenge the Model
-
-This repository is not intended for passive observation.
-
-Run it.
-
-Inspect it.
-
-Challenge it.
-
-If you believe a validation path is incorrect, provide:
-
-- environment;
-- exact command;
-- result observed;
-- failure case attempted;
-- expected behavior;
-- actual behavior;
-- repository commit;
-- source diff, if modified.
-
-Evidence-backed criticism is more valuable than agreement.
-
----
-
-## License
-
-Use of this repository is governed by:
-
-[EVALUATION_LICENSE.md](EVALUATION_LICENSE.md)
-
-Review the license before reuse, redistribution, modification, or commercial evaluation.
-
----
-
-## Contact
-
-**Vitalijus Riabovas**  
-Creator of the Veil Routing Protocol
-
-Email:
-
-**jumpingvpn@proton.me**
+Implementation remains protected.
