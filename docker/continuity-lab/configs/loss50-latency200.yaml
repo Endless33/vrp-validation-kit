@@ -1,0 +1,33 @@
+schema_version: "vrp-continuity-lab/scenario-v1"
+
+scenario:
+  id: "loss50-latency200"
+  title: "200ms Latency Impairment"
+  category: "network"
+
+execution:
+  duration_seconds: 60
+  infrastructure_ready_timeout_seconds: 30
+  subject_ready_timeout_seconds: 20
+  completion_grace_seconds: 15
+
+topology:
+  profile: "dual-path-single-origin-v1"
+
+fault_schedule:
+
+  - event_id: latency-start
+    at_seconds: 5
+    action: network.toxic.add
+    target: wifi
+
+  - event_id: latency-stop
+    at_seconds: 45
+    action: network.toxic.remove
+    target: wifi
+
+acceptance:
+  contract: "../expected/invariant-contract.json"
+
+limitations:
+  - "Latency injected through Toxiproxy."
