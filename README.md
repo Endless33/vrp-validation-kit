@@ -177,6 +177,38 @@ The public evaluation boundary does **not** expose:
 
 The public repository evaluates externally observable behavior only.
 
+## Manual Cable Pull Test
+
+Run the Wi-Fi to Mobile continuity scenario:
+
+```bash
+export VRP_LAB_SUBJECT_IMAGE=vrp-subject-local:test
+
+./docker/continuity-lab/scripts/run-scenario.sh \
+docker/continuity-lab/configs/wifi-to-mobile.yaml
+```
+
+When the scenario reaches the migration phase:
+
+- disconnect the primary network interface;
+- or disable the active adapter;
+- or physically unplug the Ethernet cable.
+
+The evaluation harness will observe the externally visible continuity behavior.
+
+After the run completes:
+
+```bash
+./docker/continuity-lab/scripts/verify-evidence.sh \
+docker/continuity-lab/out/<RUN_ID>
+```
+
+Expected result:
+
+```
+VERDICT=PASS
+```
+
 ---
 
 # Requirements
