@@ -1,0 +1,183 @@
+VRP VALIDATION KIT — EVALUATION-ONLY LICENSE
+Version 1.0
+
+Copyright (c) 2026 Vitalijus Riabovas
+All rights reserved.
+
+VRP — Veil Routing Protocol
+
+1. PURPOSE
+
+This repository and all materials contained within it are made available
+solely for independent evaluation, validation, testing, research, technical
+review, and verification of publicly stated VRP validation claims.
+
+This repository is NOT an open-source implementation of VRP.
+
+No rights are granted except those expressly stated in this License.
+
+
+2. LIMITED PERMISSION
+
+Subject to this License, you may:
+
+- view and clone this repository;
+- build and execute the Validation Kit;
+- inspect source code contained specifically in this repository;
+- execute the supplied validation scenarios;
+- perform independent technical testing;
+- reproduce validation experiments;
+- analyze generated validation evidence;
+- publish truthful evaluation results that clearly identify this repository
+  and Vitalijus Riabovas as the source.
+
+These permissions exist solely for evaluation and verification.
+
+
+3. PROHIBITED USE
+
+Without prior written permission from Vitalijus Riabovas, you may NOT:
+
+- use this repository or any substantial portion of it commercially;
+- sell, sublicense, lease, monetize, or commercially exploit its contents;
+- redistribute modified or unmodified copies outside functionality expressly
+  provided by the hosting platform;
+- incorporate repository code into another product, service, protocol,
+  appliance, library, platform, or commercial system;
+- create or distribute derivative implementations based substantially on
+  repository code;
+- use repository code as an implementation component of a production system;
+- remove, alter, obscure, or falsify authorship or copyright notices;
+- claim authorship, ownership, invention, or origination of repository content;
+- represent repository content as your own work;
+- represent this repository as the official or complete implementation of VRP;
+- imply endorsement, partnership, certification, or authorization by
+  Vitalijus Riabovas without written permission;
+- use repository contents as evidence of ownership of VRP, Veil Routing
+  Protocol, its validation methodology, artifacts, documentation, or
+  associated intellectual property;
+- use VRP names, marks, logos, or branding to market another implementation
+  as VRP or as officially compatible with VRP without written permission.
+
+
+4. NO IMPLEMENTATION LICENSE
+
+Access to this repository does NOT grant a license to implement VRP.
+
+The Validation Kit demonstrates and evaluates selected externally observable
+properties and validation scenarios.
+
+Publication of a validation artifact, test, interface, report, scenario,
+description, or observable behavior does not constitute permission to use
+copyrighted repository material in another implementation.
+
+Any commercial implementation, integration, deployment, licensing,
+technology transfer, or other rights require a separate written agreement.
+
+
+5. INTELLECTUAL PROPERTY
+
+Except for third-party material governed by its respective license, all
+copyright and other rights in repository material remain with their
+respective rights holders.
+
+Nothing in this License transfers ownership of:
+
+- VRP / Veil Routing Protocol;
+- repository source code;
+- validation software;
+- validation scenarios;
+- validation artifacts;
+- reports;
+- documentation;
+- diagrams;
+- evidence formats;
+- branding;
+- or associated intellectual property.
+
+All rights not expressly granted are reserved.
+
+
+6. VALIDATION RESULTS
+
+Independent testing is encouraged.
+
+You may publish genuine results obtained from this repository provided that:
+
+- results are not knowingly falsified or materially misrepresented;
+- modifications affecting the experiment are disclosed;
+- the tested repository version or commit is identified where reasonably
+  possible;
+- published results do not imply certification or endorsement by the author.
+
+
+7. THIRD-PARTY COMPONENTS
+
+Third-party software, dependencies, trademarks, or other materials remain
+subject to their respective licenses and ownership rights.
+
+This License does not override rights granted by third parties.
+
+
+8. NO TRADEMARK LICENSE
+
+No trademark, trade-name, logo, or branding rights are granted by this
+License.
+
+"VRP" and "Veil Routing Protocol" may be referenced factually when describing
+or evaluating this repository, but may not be used to brand another product,
+service, protocol, or implementation without prior written permission.
+
+
+9. NO WARRANTY
+
+THE REPOSITORY AND ALL ASSOCIATED MATERIALS ARE PROVIDED "AS IS",
+WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE,
+NONINFRINGEMENT, RELIABILITY, AVAILABILITY, OR FITNESS FOR PRODUCTION USE.
+
+USE AND EVALUATION ARE AT YOUR OWN RISK.
+
+
+10. LIMITATION OF LIABILITY
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE AUTHOR SHALL NOT BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+CONSEQUENTIAL, OR OTHER DAMAGES ARISING FROM ACCESS TO OR USE OF THIS
+REPOSITORY OR ITS MATERIALS.
+
+
+11. TERMINATION
+
+Any rights granted under this License terminate automatically upon material
+breach of its terms.
+
+Following termination, no further exercise of rights granted solely by this
+License is authorized.
+
+
+12. COMMERCIAL AND PILOT RIGHTS
+
+Commercial evaluation, pilot deployment, production integration,
+implementation rights, technology licensing, and other commercial rights
+are NOT granted under this License.
+
+They require a separate written agreement with Vitalijus Riabovas.
+
+
+13. ACCEPTANCE
+
+By exercising permissions granted specifically under this License, you agree
+to comply with its terms.
+
+If you do not agree with these terms, do not exercise rights granted solely
+by this License.
+
+
+AUTHOR
+
+Vitalijus Riabovas
+VRP — Veil Routing Protocol
+
+Copyright (c) 2026 Vitalijus Riabovas.
+All rights reserved.
