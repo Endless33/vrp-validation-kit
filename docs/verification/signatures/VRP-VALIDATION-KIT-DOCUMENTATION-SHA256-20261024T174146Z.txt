@@ -1,0 +1,30 @@
+VRP VALIDATION KIT — PUBLIC DOCUMENTATION SHA-256 EVIDENCE MANIFEST
+
+Author: Vitalijus Riabovas
+Project: VRP — Veil Routing Protocol
+Repository: https://github.com/Endless33/vrp-validation-kit
+Repository Role: External Validation Kit
+Commit: 7b4c318e51064604d08e0c306e76ac93b89223cf
+Tree: c9d06d8596a812e94d52d2c06ce8efb8d5d77c30
+Generated UTC: 2026-10-24T17:41:46Z
+Hash Algorithm: SHA-256
+
+Purpose:
+Cryptographic integrity record for selected public VRP Validation Kit
+documentation and integrity metadata present at the repository identity
+recorded above.
+
+This manifest records file identity only.
+It does not modify or replace existing repository integrity evidence.
+
+Files:
+7784e2a7ad9240b24f8239045f7d8e6dd39fc5dfcbd1749b16eb959c776b4411  README.md
+4310842f6a70c66cabe2c72638f8a77b7de8bba985fcedf1d86d9c1b4c0eefe3  LICENSE
+56b1d5bdb3a0f31b55f4b1fddaf747d3562a38c34e50a0f0330d35183a02253f  docs/architecture/WHY_VRP_IS_A_NEXT_GENERATION_PROTOCOL.md
+ff4a179257a3dcbb2b6834988c8869c3a28e7754299c5f7fa090c5bda8623649  docs/commercial/PILOT_ENGAGEMENT_LIFECYCLE.md
+d59b249205ef4be1e4a3b3bf1a30787d8d64146289a28334a5394901c0781e74  docs/governance/VRP_MATURITY_AND_RELEASE_POLICY.md
+db3b82230251989ccb440589a56fcb6fe69932365da7d4adbd7367b94bc1acd6  docs/integrity/VRP_DOCUMENTATION_PACKAGE.meta
+572be7c164e58869fe3a9b79f91eba7a12904071c184f4bd6da4a9db8a9f582d  docs/integrity/VRP_DOCUMENTATION_PACKAGE.root
+719e7c71a7dd4a357a50610ce1178f9001f555cc18fb67e4860084f89a096892  docs/integrity/VRP_DOCUMENTATION_PACKAGE.sha256
+c3e313e96044d78c45e0570624d6e3bff18a83d00bf4979ecf2c2f8050f56f51  docs/integrity/WHY_VRP_IS_A_NEXT_GENERATION_PROTOCOL.meta
+c4e44b1baff78f7e132b175f8e044fe80bf795acf37b26f4628cca1ac87920a0  docs/integrity/WHY_VRP_IS_A_NEXT_GENERATION_PROTOCOL.sha256
