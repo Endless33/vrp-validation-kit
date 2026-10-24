@@ -1,180 +1,575 @@
 VRP VALIDATION KIT — EVALUATION-ONLY LICENSE
-Version 1.0
+Version 1.1
 
 Copyright (c) 2026 Vitalijus Riabovas
 All rights reserved.
 
 VRP — Veil Routing Protocol
 
+IMPORTANT:
+
+THIS IS AN EVALUATION-ONLY LICENSE.
+
+THIS SOFTWARE IS NOT PROVIDED AS OPEN-SOURCE SOFTWARE.
+
+NO LICENSE TO IMPLEMENT, REIMPLEMENT, COMMERCIALIZE, DEPLOY, OR CREATE
+A COMPETING OR DERIVATIVE IMPLEMENTATION OF VRP IS GRANTED BY ACCESS TO
+THIS REPOSITORY.
+
+ALL RIGHTS NOT EXPRESSLY GRANTED BELOW ARE RESERVED.
+
+
 1. PURPOSE
 
-This repository and all materials contained within it are made available
-solely for independent evaluation, validation, testing, research, technical
-review, and verification of publicly stated VRP validation claims.
+The VRP Validation Kit, including its source code, validation software,
+scenarios, documentation, reports, evidence formats, schemas, diagrams,
+test logic, verification logic, and associated repository materials
+(collectively, the "Validation Kit"), is made available solely for:
 
-This repository is NOT an open-source implementation of VRP.
+- independent evaluation;
+- technical validation;
+- testing;
+- security review;
+- academic or engineering research;
+- reproduction of published validation experiments;
+- verification of publicly stated VRP validation claims.
 
-No rights are granted except those expressly stated in this License.
+The Validation Kit exists to evaluate selected externally observable
+properties of VRP and related validation subjects.
+
+The Validation Kit is NOT the production implementation of VRP.
+
+Publication of the Validation Kit does not place VRP, its protected
+implementation, or any associated intellectual property into the public
+domain.
 
 
-2. LIMITED PERMISSION
+2. LIMITED EVALUATION LICENSE
 
-Subject to this License, you may:
+Subject to full compliance with this License, Vitalijus Riabovas grants you
+a limited, revocable, non-exclusive, non-transferable, non-sublicensable
+license to use the Validation Kit solely for non-production evaluation and
+verification.
 
-- view and clone this repository;
-- build and execute the Validation Kit;
-- inspect source code contained specifically in this repository;
-- execute the supplied validation scenarios;
-- perform independent technical testing;
-- reproduce validation experiments;
+Under this limited permission, you may:
+
+- view this repository;
+- clone this repository for your own evaluation;
+- inspect source code contained specifically within the Validation Kit;
+- compile and execute the Validation Kit;
+- execute supplied public validation scenarios;
+- create temporary local modifications necessary for evaluation;
+- perform independent technical and security testing;
+- reproduce published validation experiments;
 - analyze generated validation evidence;
-- publish truthful evaluation results that clearly identify this repository
-  and Vitalijus Riabovas as the source.
+- compare validation results;
+- develop additional evaluation scenarios for your own testing;
+- report bugs and reproducible counterexamples;
+- publish truthful evaluation results in accordance with Section 8.
 
-These permissions exist solely for evaluation and verification.
+No permission is granted beyond these evaluation purposes.
 
 
-3. PROHIBITED USE
+3. NO OPEN-SOURCE GRANT
 
-Without prior written permission from Vitalijus Riabovas, you may NOT:
+This License is not intended to be, and shall not be interpreted as, an
+open-source license.
 
-- use this repository or any substantial portion of it commercially;
-- sell, sublicense, lease, monetize, or commercially exploit its contents;
-- redistribute modified or unmodified copies outside functionality expressly
-  provided by the hosting platform;
-- incorporate repository code into another product, service, protocol,
-  appliance, library, platform, or commercial system;
-- create or distribute derivative implementations based substantially on
-  repository code;
-- use repository code as an implementation component of a production system;
-- remove, alter, obscure, or falsify authorship or copyright notices;
-- claim authorship, ownership, invention, or origination of repository content;
-- represent repository content as your own work;
-- represent this repository as the official or complete implementation of VRP;
-- imply endorsement, partnership, certification, or authorization by
-  Vitalijus Riabovas without written permission;
-- use repository contents as evidence of ownership of VRP, Veil Routing
-  Protocol, its validation methodology, artifacts, documentation, or
-  associated intellectual property;
+Access to source code in this repository does not grant unrestricted rights
+to use, modify, distribute, sublicense, commercialize, or incorporate that
+source code into other software.
+
+The availability of source code is provided for transparency and independent
+evaluation only.
+
+No rights shall be implied merely because repository material is publicly
+accessible.
+
+
+4. PROHIBITED USE
+
+Except with prior written permission from Vitalijus Riabovas, you may NOT:
+
+- use the Validation Kit or any substantial portion of it commercially;
+
+- use the Validation Kit in production;
+
+- sell, rent, lease, sublicense, monetize, or commercially exploit the
+  Validation Kit or any substantial portion of it;
+
+- offer the Validation Kit, or a modified version of it, as a hosted,
+  managed, cloud, SaaS, consulting, validation-as-a-service, or other
+  commercial service;
+
+- redistribute copies or modified copies of repository material except
+  through functionality expressly provided by the repository hosting
+  platform or as otherwise authorized in writing;
+
+- incorporate Validation Kit source code into another product, service,
+  protocol, appliance, library, SDK, platform, runtime, network system,
+  security product, or commercial system;
+
+- use Validation Kit source code as a production implementation component;
+
+- create, distribute, or commercialize a derivative implementation based
+  substantially on Validation Kit source code;
+
+- translate Validation Kit source code into another programming language
+  for the purpose of creating an implementation or production component;
+
+- port Validation Kit implementation logic into another software system
+  except where strictly necessary for private evaluation;
+
+- use repository material to create a substitute for the Validation Kit or
+  for the protected VRP implementation;
+
+- use repository material to implement or reimplement VRP;
+
+- represent observable behavior, validation contracts, or public interfaces
+  as authorization to reproduce protected VRP implementation mechanisms;
+
+- use the Validation Kit to circumvent, extract, reconstruct, or obtain
+  protected runtime source code, cryptographic secrets, private keys,
+  credentials, or other non-public protected material;
+
+- remove, alter, obscure, falsify, or misrepresent copyright, authorship,
+  attribution, provenance, or license notices;
+
+- claim authorship, ownership, invention, or origination of repository
+  material created by Vitalijus Riabovas;
+
+- represent repository material as your own original work;
+
+- represent the Validation Kit as the official or complete production
+  implementation of VRP;
+
+- falsely claim that evaluation results constitute certification of VRP;
+
+- imply endorsement, partnership, certification, sponsorship, affiliation,
+  or authorization by Vitalijus Riabovas without prior written permission;
+
+- use repository material as evidence that you own VRP, Veil Routing
+  Protocol, its implementation, its Validation Kit, or associated
+  intellectual property;
+
 - use VRP names, marks, logos, or branding to market another implementation
-  as VRP or as officially compatible with VRP without written permission.
+  as VRP, Veil Routing Protocol, officially compatible with VRP, or
+  officially derived from VRP without prior written permission.
 
 
-4. NO IMPLEMENTATION LICENSE
+5. NO IMPLEMENTATION LICENSE
 
-Access to this repository does NOT grant a license to implement VRP.
+Access to the Validation Kit does NOT grant any license to implement VRP.
 
-The Validation Kit demonstrates and evaluates selected externally observable
-properties and validation scenarios.
+For avoidance of doubt:
 
-Publication of a validation artifact, test, interface, report, scenario,
-description, or observable behavior does not constitute permission to use
-copyrighted repository material in another implementation.
+    PUBLIC OBSERVABILITY != IMPLEMENTATION LICENSE
 
-Any commercial implementation, integration, deployment, licensing,
-technology transfer, or other rights require a separate written agreement.
+    VALIDATION ACCESS != PRODUCTION RIGHTS
+
+    REPRODUCIBLE BEHAVIOR != TRANSFER OF IMPLEMENTATION RIGHTS
+
+The Validation Kit demonstrates or evaluates selected externally observable
+properties.
+
+Publication of any:
+
+- invariant;
+- scenario;
+- validation result;
+- interface;
+- schema;
+- report;
+- evidence format;
+- test;
+- documentation;
+- protocol description;
+- diagram;
+- observable behavior;
+- validation methodology;
+
+does not by itself grant permission to copy protected expression, reuse
+Validation Kit source code in another implementation, or exercise rights
+not expressly granted by this License.
+
+Any implementation, integration, production deployment, commercial pilot,
+technology transfer, or other commercial use requires a separate written
+agreement where applicable.
 
 
-5. INTELLECTUAL PROPERTY
+6. PROTECTED IMPLEMENTATION BOUNDARY
 
-Except for third-party material governed by its respective license, all
+The Validation Kit is intentionally separated from the protected VRP runtime.
+
+Nothing in this License grants access or rights to:
+
+- protected VRP runtime source code;
+- non-public authority implementation;
+- non-public continuity-engine implementation;
+- non-public recovery implementation;
+- private cryptographic material;
+- private keys;
+- credentials;
+- protected runtime memory;
+- proprietary deployment material;
+- confidential implementation documentation.
+
+The ability to observe, test, or validate externally visible behavior does
+not create a right to obtain or reproduce protected implementation material.
+
+
+7. ARTIFICIAL INTELLIGENCE AND MACHINE LEARNING
+
+Except with prior written permission from Vitalijus Riabovas, repository
+contents may not be used as a dataset or substantial dataset component for:
+
+- training machine-learning models;
+- fine-tuning machine-learning models;
+- model distillation;
+- code-generation model training;
+- embedding-model training;
+- retrieval corpora intended to reproduce repository implementation content;
+- automated generation of a substitute or derivative implementation.
+
+This restriction does not prohibit ordinary automated tools used solely to
+inspect, search, test, analyze, or evaluate the Validation Kit for the
+purposes expressly permitted by this License.
+
+Nothing in this section grants rights that are otherwise prohibited by this
+License.
+
+
+8. PUBLICATION OF VALIDATION RESULTS
+
+Independent evaluation and criticism are permitted and encouraged.
+
+You may publish genuine results obtained from evaluation of the Validation
+Kit provided that:
+
+- results are not knowingly falsified or materially misrepresented;
+
+- the evaluated repository is clearly identified;
+
+- the evaluated version, tag, or commit hash is identified where reasonably
+  possible;
+
+- modifications materially affecting the experiment are disclosed;
+
+- the relevant scenario and execution environment are identified where
+  reasonably necessary to understand the result;
+
+- PASS, FAIL, INCOMPLETE, or equivalent results are represented according to
+  the scope actually tested;
+
+- results are not represented as proof of properties outside the evaluated
+  scenario;
+
+- results are not represented as certification unless an actual authorized
+  certification exists;
+
+- publication does not imply endorsement by Vitalijus Riabovas.
+
+Truthful criticism, security findings, negative results, and reproducible
+counterexamples are permitted under this section.
+
+Nothing in this License requires favorable reporting.
+
+
+9. VALIDATION RESULTS DO NOT TRANSFER RIGHTS
+
+A successful validation result establishes only the result defined by the
+relevant public validation contract for the evaluated scenario.
+
+A PASS result does not grant:
+
+- implementation rights;
+- production rights;
+- commercial rights;
+- sublicensing rights;
+- ownership rights;
+- trademark rights;
+- patent rights;
+- rights to protected runtime material;
+- certification status.
+
+Validation evidence is evidence.
+
+It is not a technology-transfer instrument.
+
+
+10. INTELLECTUAL PROPERTY
+
+Except for third-party material governed by its respective terms, all
 copyright and other rights in repository material remain with their
 respective rights holders.
 
 Nothing in this License transfers ownership of:
 
 - VRP / Veil Routing Protocol;
-- repository source code;
+- Validation Kit source code;
 - validation software;
 - validation scenarios;
 - validation artifacts;
+- validation methodology expressed in repository material;
 - reports;
 - documentation;
 - diagrams;
+- schemas;
 - evidence formats;
-- branding;
+- repository branding;
+- logos;
 - or associated intellectual property.
 
 All rights not expressly granted are reserved.
 
-
-6. VALIDATION RESULTS
-
-Independent testing is encouraged.
-
-You may publish genuine results obtained from this repository provided that:
-
-- results are not knowingly falsified or materially misrepresented;
-- modifications affecting the experiment are disclosed;
-- the tested repository version or commit is identified where reasonably
-  possible;
-- published results do not imply certification or endorsement by the author.
+No implied license arises from publication, disclosure, evaluation,
+discussion, testing, or repository access.
 
 
-7. THIRD-PARTY COMPONENTS
+11. ATTRIBUTION AND PROVENANCE
 
-Third-party software, dependencies, trademarks, or other materials remain
-subject to their respective licenses and ownership rights.
+When publicly reproducing evaluation results, substantial excerpts permitted
+by applicable law or this License, or descriptions derived directly from
+this Validation Kit, you must not falsify or remove repository provenance.
 
-This License does not override rights granted by third parties.
+Where attribution is reasonably appropriate, identify:
 
+    Vitalijus Riabovas
+    VRP — Veil Routing Protocol
+    VRP Validation Kit
 
-8. NO TRADEMARK LICENSE
-
-No trademark, trade-name, logo, or branding rights are granted by this
-License.
-
-"VRP" and "Veil Routing Protocol" may be referenced factually when describing
-or evaluating this repository, but may not be used to brand another product,
-service, protocol, or implementation without prior written permission.
+Attribution does not grant endorsement, partnership, certification, or
+additional rights.
 
 
-9. NO WARRANTY
+12. NO TRADEMARK LICENSE
 
-THE REPOSITORY AND ALL ASSOCIATED MATERIALS ARE PROVIDED "AS IS",
-WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
-TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE,
-NONINFRINGEMENT, RELIABILITY, AVAILABILITY, OR FITNESS FOR PRODUCTION USE.
+No trademark, trade-name, service-mark, logo, or branding license is granted
+under this License.
+
+"VRP", "Veil Routing Protocol", and related names may be referenced
+factually when identifying, discussing, testing, criticizing, or evaluating
+this repository.
+
+They may not be used to brand another product, service, protocol,
+implementation, company offering, or commercial system as:
+
+- VRP;
+- Veil Routing Protocol;
+- official VRP;
+- certified VRP;
+- VRP-compatible;
+- VRP-derived;
+
+where such use would imply authorization, origin, endorsement, or
+affiliation without prior written permission.
+
+
+13. THIRD-PARTY COMPONENTS
+
+Third-party software, dependencies, trademarks, libraries, tools, and other
+materials remain subject to their respective licenses and ownership rights.
+
+This License applies only to material for which the applicable rights holder
+has authority to grant the permissions stated here.
+
+Nothing in this License overrides rights granted or obligations imposed by
+third-party licenses.
+
+
+14. SECURITY RESEARCH
+
+Good-faith evaluation of the public Validation Kit is permitted within the
+scope of this License.
+
+This includes:
+
+- adversarial testing of public validation logic;
+- attempts to reproduce declared failure conditions;
+- attempts to produce reproducible counterexamples;
+- analysis of public evidence;
+- verifier testing;
+- boundary testing of publicly exposed evaluation interfaces.
+
+This permission does not authorize:
+
+- unauthorized access to systems;
+- attacks against third-party infrastructure;
+- acquisition of credentials or secrets;
+- circumvention of access controls protecting non-public material;
+- access to protected runtime systems without authorization;
+- activity prohibited by applicable law.
+
+Testing must be performed only against systems and environments for which
+the evaluator has authorization.
+
+
+15. NO WARRANTY
+
+THE VALIDATION KIT AND ALL ASSOCIATED MATERIALS ARE PROVIDED "AS IS" AND
+"AS AVAILABLE", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED.
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, ALL WARRANTIES ARE
+DISCLAIMED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF:
+
+- MERCHANTABILITY;
+- FITNESS FOR A PARTICULAR PURPOSE;
+- NON-INFRINGEMENT;
+- ACCURACY;
+- RELIABILITY;
+- AVAILABILITY;
+- SECURITY;
+- FITNESS FOR PRODUCTION USE.
+
+NO VALIDATION RESULT, DOCUMENTATION, TEST, REPORT, OR PUBLIC STATEMENT
+CONSTITUTES A WARRANTY THAT VRP OR ANY EVALUATED SUBJECT IS ERROR-FREE,
+SECURE AGAINST EVERY ATTACK, OR SUITABLE FOR A PARTICULAR DEPLOYMENT.
 
 USE AND EVALUATION ARE AT YOUR OWN RISK.
 
 
-10. LIMITATION OF LIABILITY
+16. LIMITATION OF LIABILITY
 
-TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE AUTHOR SHALL NOT BE
-LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
-CONSEQUENTIAL, OR OTHER DAMAGES ARISING FROM ACCESS TO OR USE OF THIS
-REPOSITORY OR ITS MATERIALS.
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, VITALIJUS RIABOVAS AND
+OTHER APPLICABLE RIGHTS HOLDERS SHALL NOT BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, PUNITIVE, CONSEQUENTIAL, OR
+OTHER DAMAGES, OR FOR LOSS OF DATA, PROFITS, REVENUE, BUSINESS,
+OPPORTUNITY, GOODWILL, OR SERVICE AVAILABILITY, ARISING FROM OR RELATED TO:
+
+- ACCESS TO THE VALIDATION KIT;
+- USE OF THE VALIDATION KIT;
+- INABILITY TO USE THE VALIDATION KIT;
+- RELIANCE ON VALIDATION RESULTS;
+- MODIFICATION OF THE VALIDATION KIT;
+- EXECUTION OF VALIDATION SCENARIOS;
+- PUBLICATION OR INTERPRETATION OF EVALUATION RESULTS;
+
+EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 
-11. TERMINATION
+17. TERMINATION
 
 Any rights granted under this License terminate automatically upon material
 breach of its terms.
 
-Following termination, no further exercise of rights granted solely by this
-License is authorized.
+Upon termination:
+
+- no further exercise of rights granted solely by this License is authorized;
+
+- any continued use requiring permission under this License must cease;
+
+- termination does not create any right to retain, commercialize, sublicense,
+  or deploy repository material.
+
+Sections that by their nature are intended to survive termination, including
+ownership, intellectual-property, warranty, liability, and rights-reservation
+provisions, survive termination to the extent permitted by applicable law.
 
 
-12. COMMERCIAL AND PILOT RIGHTS
+18. COMMERCIAL, PILOT, AND PRODUCTION RIGHTS
 
-Commercial evaluation, pilot deployment, production integration,
-implementation rights, technology licensing, and other commercial rights
-are NOT granted under this License.
+This License does NOT grant rights for:
 
-They require a separate written agreement with Vitalijus Riabovas.
+- commercial deployment;
+- production deployment;
+- paid pilot deployment;
+- commercial integration;
+- OEM use;
+- redistribution in a commercial product;
+- managed-service use;
+- technology transfer;
+- implementation licensing;
+- commercial sublicensing;
+- production support rights.
+
+Such rights require a separate written agreement with Vitalijus Riabovas
+where applicable.
+
+A separate agreement may define, among other things:
+
+- pilot scope;
+- evaluation environment;
+- deployment rights;
+- integration rights;
+- commercial terms;
+- support obligations;
+- confidentiality;
+- protected implementation access;
+- intellectual-property rights;
+- security obligations.
 
 
-13. ACCEPTANCE
+19. NO WAIVER
+
+Failure to enforce any provision of this License in a particular instance
+does not constitute a waiver of that provision or of the right to enforce
+it in another instance.
+
+Any waiver must be expressly made by the applicable rights holder.
+
+
+20. SEVERABILITY
+
+If any provision of this License is determined to be invalid or
+unenforceable, the remaining provisions shall continue in effect to the
+maximum extent permitted by applicable law.
+
+Any invalid or unenforceable provision should be interpreted, where legally
+permitted, as narrowly as necessary to preserve the intended evaluation-only
+boundary.
+
+
+21. ENTIRE LICENSE
+
+This License constitutes the terms under which rights are granted by this
+License to the Validation Kit unless another written agreement expressly
+supersedes it.
+
+No statement in documentation, README files, validation output, issues,
+discussions, demonstrations, presentations, or other repository material
+shall be interpreted as granting additional rights unless it expressly
+states that it is a license grant made by an authorized rights holder.
+
+
+22. ACCEPTANCE
 
 By exercising permissions granted specifically under this License, you agree
 to comply with its terms.
 
-If you do not agree with these terms, do not exercise rights granted solely
-by this License.
+If you do not agree with these terms, do not exercise rights that require
+permission under this License.
 
 
-AUTHOR
+23. RIGHTS RESERVATION
+
+No rights are granted except those expressly stated in this License.
+
+For avoidance of doubt:
+
+    SOURCE AVAILABLE FOR EVALUATION
+        !=
+    OPEN SOURCE
+
+    PUBLIC VALIDATION
+        !=
+    PUBLIC IMPLEMENTATION
+
+    OBSERVABLE BEHAVIOR
+        !=
+    OWNERSHIP OF IMPLEMENTATION
+
+    REPRODUCIBLE EVIDENCE
+        !=
+    COMMERCIAL LICENSE
+
+    ACCESS
+        !=
+    TECHNOLOGY TRANSFER
+
+All rights not expressly granted are reserved.
+
+
+AUTHOR AND COPYRIGHT HOLDER
 
 Vitalijus Riabovas
 VRP — Veil Routing Protocol
