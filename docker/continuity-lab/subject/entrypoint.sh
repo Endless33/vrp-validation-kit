@@ -456,8 +456,21 @@ run)
         done
 
         # --------------------------------------------------------
+        # Public path transition after blackout recovery.
+        # --------------------------------------------------------
+
+        write_event \
+            "${SEQUENCE}" \
+            "mock-path-transition-${SEQUENCE}" \
+            "path-transition" \
+            "observed" \
+            "mobile" \
+            "${CONTINUITY_REFERENCE}"
+
+        SEQUENCE=$((SEQUENCE + 1))
+
+        # --------------------------------------------------------
         # Post-recovery progress.
-        # Public continuity resumes after blackout recovery.
         # --------------------------------------------------------
 
         for i in 1 2 3 4 5; do

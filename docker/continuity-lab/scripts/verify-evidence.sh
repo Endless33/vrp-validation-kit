@@ -1167,6 +1167,28 @@ def scenario_checks(
         and (.event_id | nonempty_string)
         and (.event_kind | nonempty_string)
         and (.public_verdict | nonempty_string)
+        and (
+          if .event_kind == "progress" then
+            (.public_verdict == "succeeded"
+             or .public_verdict == "failed"
+             or .public_verdict == "paused")
+          elif .event_kind == "path-transition" then
+            .public_verdict == "observed"
+          elif .event_kind == "mutation" then
+            (.public_verdict == "accepted"
+             or .public_verdict == "rejected"
+             or .public_verdict == "accepted-duplicate")
+          elif .event_kind == "stimulus-verdict" then
+            (.public_verdict == "rejected-stale-authority"
+             or .public_verdict == "rejected-replay"
+             or .public_verdict == "accepted")
+          elif .event_kind == "lifecycle" then
+            (.public_verdict == "ready"
+             or .public_verdict == "completed")
+          else
+            false
+          end
+        )
         and (.observed_at_utc | valid_utc)
     )
 ) as $schema_compatible
