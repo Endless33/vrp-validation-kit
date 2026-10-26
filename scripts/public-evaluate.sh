@@ -161,18 +161,52 @@ if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
 
             (
                 cd "$LAB_DIR" || exit 1
-                ./scripts/run-scenario.sh "$scenario"
+                ./scripts/run-scenario.sh "configs/${scenario}.yaml"
             ) 2>&1 | tee "$LOG_DIR/docker-${scenario}.log"
 
             SCENARIO_RC=${PIPESTATUS[0]}
 
             printf 'SCENARIO_RC=%d\n' "$SCENARIO_RC"
 
-            if [ "$SCENARIO_RC" -eq 0 ]; then
+            if [ "$SCENARIO_RC" -ne 0 ]; then
+                printf 'STATUS=FAIL\n'
+                printf 'reason=scenario_execution_failed\n'
+                record_fail
+                continue
+            fi
+
+            RUN_DIR="$(
+                sed -n 's/^\[vrp-lab\] RUN_DIR=//p' \
+                    "$LOG_DIR/docker-${scenario}.log" |
+                tail -n 1
+            )"
+
+            if [ -z "$RUN_DIR" ] || [ ! -d "$RUN_DIR" ]; then
+                printf 'STATUS=FAIL\n'
+                printf 'reason=scenario_run_directory_not_found\n'
+                record_fail
+                continue
+            fi
+
+            printf 'RUN_DIR=%s\n' "$RUN_DIR"
+
+            (
+                cd "$LAB_DIR" || exit 1
+                VRP_LAB_OVERWRITE_VERIFICATION=1 \
+                    ./scripts/verify-evidence.sh "$RUN_DIR"
+            ) 2>&1 | tee "$LOG_DIR/docker-${scenario}-verify.log"
+
+            VERIFY_RC=${PIPESTATUS[0]}
+
+            printf 'VERIFY_RC=%d\n' "$VERIFY_RC"
+
+            if [ "$VERIFY_RC" -eq 0 ]; then
                 printf 'STATUS=PASS\n'
+                printf 'pass_basis=evidence_verification\n'
                 record_pass
             else
                 printf 'STATUS=FAIL\n'
+                printf 'reason=evidence_verification_failed\n'
                 record_fail
             fi
         done
