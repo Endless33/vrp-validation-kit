@@ -28,7 +28,7 @@ https://tally.so/r/ZjQLN0
 
 Purpose
 
-The VRP External Validation Kit provides public tools and documentation for evaluating declared VRP behavior without publishing the protected runtime implementation.
+The VRP External Validation Kit provides public tools, scenarios, evidence verifiers, and documentation for evaluating declared VRP behavior without publishing the protected runtime implementation.
 
 The repository focuses on externally observable properties and declared public contracts including:
 
@@ -46,7 +46,8 @@ The repository focuses on externally observable properties and declared public c
 - transport-path admission;
 - rejected-endpoint state immutability;
 - legitimate transport replacement;
-- separation of network observation from path authority.
+- separation of network observation from path authority;
+- explicit separation between scenario execution and verified evidence.
 
 The objective is not agreement.
 
@@ -114,6 +115,62 @@ The objective is to prevent unauthorized transport replacement.
 
 ---
 
+Evidence-Gated Evaluation Principle
+
+The public evaluator now enforces another important distinction:
+
+SCENARIO EXECUTION COMPLETE != VERIFIED PASS
+
+A scenario process returning successfully is not sufficient to establish a Docker evaluation PASS.
+
+The canonical Docker evaluation path is:
+
+SCENARIO CONFIG
+      |
+      v
+EXECUTE SCENARIO
+      |
+      v
+PRODUCE EVIDENCE
+      |
+      v
+LOCATE RUN DIRECTORY
+      |
+      v
+VERIFY EVIDENCE
+      |
+      v
+VERIFIER PASS
+      |
+      v
+EVALUATOR PASS
+
+In compact form:
+
+EXECUTE
+    !=
+ASSUME PASS
+
+The required path is:
+
+EXECUTE
+    ->
+PRODUCE EVIDENCE
+    ->
+VERIFY EVIDENCE
+    ->
+PASS
+
+The evaluator fails closed when:
+
+- scenario execution fails;
+- the generated run directory cannot be resolved;
+- evidence verification fails.
+
+A Docker scenario may be reported as PASS by the canonical evaluator only after successful evidence verification.
+
+---
+
 Evaluation Boundary
 
 This repository contains public validation models, adversarial contract models, evidence verifiers, documentation, and a Docker-based black-box evaluation harness.
@@ -124,7 +181,9 @@ The standalone Go programs expose and exercise declared public validation contra
 
 They do not execute or disclose the protected production runtime.
 
-The Docker Continuity Evidence Lab evaluates a separately supplied authorized black-box subject image through a public adapter contract.
+The Docker Continuity Evidence Lab evaluates a separately supplied compatible black-box subject image through a public adapter contract.
+
+The repository also contains a public mock adapter used to qualify the Docker harness and evidence pipeline.
 
 A successful public verdict establishes only that the declared observable conditions were satisfied within the evaluated boundary.
 
@@ -177,7 +236,7 @@ Release Boundary
 Reference| Scope| Intended Use
 "v1.0.0"| Baseline public Go validation harness and early evaluation surface| Historical baseline reproduction
 "v1.1.0"| Signed public validation/evidence release| Integrity-anchored public evaluation
-"main"| Current validation work, evaluation capsule, evidence verification, Docker Continuity Evidence Lab, transport-path validation, release-closeout records, and extended documentation| Current engineering evaluation
+"main"| Current evaluator, evidence verification, Docker Continuity Evidence Lab, transport-path validation, reproducibility work, and extended documentation| Current engineering evaluation
 
 The Docker Continuity Evidence Lab, evidence-verification components, evaluation capsule, transport-path authority documentation, and later reproducibility work extend the original "v1.0.0" baseline.
 
@@ -191,20 +250,31 @@ Do not assume that results from one commit automatically apply to another.
 
 Current Main Checkpoint
 
-A clean public checkout used for standalone reproduction on 2026-10-26 resolved to:
+The current qualified public evaluator checkpoint is:
 
-HEAD:
-0ca57a74f665decc068a9c9d7756674261217301
+COMMIT:
+da5925fc1596d1b8350c24c3b822bc5820c6fe6d
 
 TREE:
-3c8afc7e757b6bd49be442c4e1d0f0e8120f990a
+92f5e67ee1ae9188dd7a1fe5967bfac26e81eaff
 
-Evaluators should record their own commit and tree before execution:
+SUBJECT:
+evaluation: gate Docker scenario pass on verified evidence
+
+The checkpoint was pushed to public "main" and subsequently verified with matching local and remote identities:
+
+LOCAL_EQUALS_ORIGIN=YES
+LOCAL_TREE_EQUALS_ORIGIN_TREE=YES
+AHEAD=0
+BEHIND=0
+
+Evaluators must still record their own checkout before execution:
 
 git rev-parse HEAD
-git rev-parse HEAD^{tree}
+git rev-parse 'HEAD^{tree}'
+git status --short
 
-The identities above describe the reproduced checkpoint only.
+The identities above describe the qualified checkpoint.
 
 They are not a substitute for recording the evaluator's actual checkout.
 
@@ -221,7 +291,8 @@ The current repository state includes:
 - evidence-bundle verification;
 - evidence tamper rejection;
 - Docker Continuity Evidence Lab;
-- five public Docker scenarios;
+- four currently published Docker scenario configuration files;
+- public Docker mock adapter for harness qualification;
 - versioned public invariant contract;
 - deterministic evidence verification;
 - report export tooling;
@@ -233,7 +304,15 @@ The current repository state includes:
 - rejected-endpoint adversarial validation;
 - real UDP path-authority validation;
 - execution-authority vs transport-authority boundary documentation;
-- immutable validation checkpoint records.
+- immutable validation checkpoint records;
+- evidence-gated Docker PASS semantics.
+
+The currently published Docker scenario configuration files are:
+
+blackout-recovery.yaml
+replay-attempt.yaml
+stale-authority.yaml
+wifi-to-mobile.yaml
 
 The Docker lab files have undergone repository-level validation including:
 
@@ -245,17 +324,16 @@ The Docker lab files have undergone repository-level validation including:
 - relative-link validation;
 - public-boundary scanning.
 
-Controlled Docker Continuity Evidence Lab work includes scenarios for:
+Controlled Docker Continuity Evidence Lab work currently includes:
 
 - Wi-Fi → Mobile migration;
 - Blackout Recovery;
 - Replay Attempt;
-- Stale Authority;
-- 200 ms Latency Impairment.
+- Stale Authority.
 
 Docker scenario results must be distinguished from standalone public-contract execution.
 
-A host that does not execute the Docker lab must report Docker as unavailable or skipped.
+A host that does not execute the Docker lab must report Docker as unavailable or skipped where applicable.
 
 SKIPPED != PASS
 
@@ -263,7 +341,7 @@ Each successful validation applies only to:
 
 - the evaluated repository state;
 - the executed scenario or public contract;
-- the supplied authorized black-box subject where applicable;
+- the supplied subject where applicable;
 - the declared invariant contract;
 - the recorded execution environment.
 
@@ -278,7 +356,7 @@ It does not establish:
 
 Public Executable Surface
 
-At the reproduced "main" checkpoint, the public Go command surface is:
+The current public Go command surface includes:
 
 cmd/attack-suite
 cmd/evidence-verify
@@ -290,7 +368,7 @@ The repository also provides the top-level public evaluation orchestrator:
 
 scripts/public-evaluate.sh
 
-Evaluators should prefer the orchestrator for a complete standalone public evaluation because it records environment information, executes the available public stages, hashes generated artifacts, and distinguishes unavailable capabilities from successful ones.
+Evaluators should prefer the orchestrator for a complete public evaluation because it records environment information, executes the available public stages, hashes generated artifacts, distinguishes unavailable capabilities from successful ones, and gates Docker PASS on evidence verification.
 
 ---
 
@@ -300,24 +378,33 @@ For the current "main" evaluation surface, the recommended entry point is:
 
 ./scripts/public-evaluate.sh
 
-The evaluator currently coordinates stages including:
+The evaluator coordinates stages including:
 
 - evaluation-capsule build;
 - environment doctor;
 - sample evidence verification;
-- Go package build/test command;
+- Go package build/test discovery;
 - Go vet;
 - validation contract model;
 - adversarial attack contract model;
 - runtime scenario contract model;
 - Docker capability detection;
-- Docker Continuity Evidence Lab execution when the required capability and authorized subject are available;
+- Docker Continuity Evidence Lab execution when the required capability and configured subject are available;
+- Docker evidence verification;
 - artifact hashing;
 - machine-readable final result.
 
+For Docker scenarios, the canonical PASS policy is:
+
+scenario execution success
+AND
+evidence verification success
+=
+PASS
+
 Unavailable optional capabilities must not be converted into PASS.
 
-The evaluator explicitly reports:
+The evaluator explicitly preserves the distinction:
 
 SKIPPED_IS_NOT_PASS
 
@@ -331,11 +418,7 @@ go test ./...
 
 is useful as a Go package compilation/test-discovery check.
 
-At the reproduced checkpoint:
-
-0ca57a74f665decc068a9c9d7756674261217301
-
-the public command packages contain no "*_test.go" files.
+During the recorded public reproduction work, the public command packages contained no "*_test.go" files.
 
 Therefore:
 
@@ -347,7 +430,7 @@ Those surfaces are executed through their corresponding commands or through:
 
 ./scripts/public-evaluate.sh
 
-A successful "go test ./..." result at this checkpoint means that the discovered Go packages completed successfully under the Go test command.
+A successful "go test ./..." result in that repository state means that the discovered Go packages completed successfully under the Go test command.
 
 It does not mean that a hidden or nonexistent unit-test suite was executed.
 
@@ -355,16 +438,14 @@ It does not mean that a hidden or nonexistent unit-test suite was executed.
 
 Standalone Reproduction — Android / Termux
 
-The current public evaluation surface has been independently re-executed from a clean repository clone on Android/ARM64 using Termux.
+The public evaluation surface was independently re-executed from a clean repository clone on Android/ARM64 using Termux during the 2026-10-26 qualification work.
 
 Recorded environment:
 
 platform=android/arm64
 go=go1.27.0
-git_head=0ca57a74f665decc068a9c9d7756674261217301
-git_tree=3c8afc7e757b6bd49be442c4e1d0f0e8120f990a
 
-The public evaluator reported:
+The standalone public evaluator stages reported:
 
 BUILD=PASS
 DOCTOR=PASS
@@ -405,11 +486,161 @@ It does not represent execution of the protected production runtime.
 
 ---
 
+Docker Qualification — Oracle Linux
+
+The Docker evaluation path was subsequently qualified on a clean Oracle Linux environment with Docker available.
+
+Recorded qualification environment included:
+
+Oracle Linux Server 10.2
+Linux x86_64
+Go 1.26.7
+Docker 29.9.2
+Docker Compose 5.6.1
+cgroup v2
+overlayfs
+tc available
+
+During this qualification, two evaluator integration defects were identified.
+
+1. Scenario Path Contract
+
+The public evaluator originally supplied bare scenario names to the Docker runner.
+
+The runner contract requires configuration paths.
+
+The evaluator was corrected to invoke:
+
+configs/wifi-to-mobile.yaml
+configs/blackout-recovery.yaml
+configs/stale-authority.yaml
+configs/replay-attempt.yaml
+
+2. Evidence-Gated PASS
+
+The evaluator originally treated successful scenario-process completion as sufficient for Docker PASS.
+
+However, the runner explicitly declares that completed scenario execution requires subsequent evidence verification.
+
+The evaluator was hardened so that successful Docker PASS now requires:
+
+SCENARIO_RC=0
+        +
+RUN_DIR resolved
+        +
+VERIFY_RC=0
+        =
+STATUS=PASS
+
+Failure modes are explicit:
+
+reason=scenario_execution_failed
+
+reason=scenario_run_directory_not_found
+
+reason=evidence_verification_failed
+
+Successful Docker evaluation reports:
+
+STATUS=PASS
+pass_basis=evidence_verification
+
+This means the evaluator no longer follows:
+
+EXECUTE
+    ->
+ASSUME PASS
+
+It follows:
+
+EXECUTE
+    ->
+PRODUCE EVIDENCE
+    ->
+VERIFY EVIDENCE
+    ->
+PASS
+
+---
+
+Qualified Canonical Evaluator Result
+
+After the evaluator hardening, the complete canonical public evaluation was re-executed using the public Docker mock adapter.
+
+Final result:
+
+PASSED=12
+FAILED=0
+SKIPPED=0
+FINAL_RC=0
+FINAL_VERDICT=PUBLIC_EVALUATION_PASSED
+
+Docker qualification:
+
+DOCKER_SCENARIOS_EXECUTED=4_OF_4
+DOCKER_SCENARIOS_VERIFIED=4_OF_4
+
+For every Docker scenario, the qualification path included:
+
+RUN_STATE=COMPLETE
+VERIFICATION_REQUIRED=true
+SCENARIO_RC=0
+VERDICT=PASS
+VERIFY_RC=0
+STATUS=PASS
+pass_basis=evidence_verification
+
+The subject used for this public harness qualification was:
+
+SUBJECT_TYPE=PUBLIC_MOCK_ADAPTER
+
+The boundary is explicit:
+
+PROTECTED_VRP_RUNTIME_TESTED=NO
+
+Therefore, this result qualifies:
+
+- the public evaluator;
+- Docker scenario orchestration;
+- Docker harness execution;
+- evidence generation;
+- run-directory handoff;
+- deterministic evidence verification;
+- PASS/FAIL integration.
+
+It must not be represented as execution or validation of the protected VRP production runtime.
+
+---
+
+Public Docker Mock Adapter
+
+The repository contains a public mock adapter used to qualify the Docker harness and evidence-verification pipeline.
+
+The mock adapter is not the protected VRP runtime.
+
+It exists so that public infrastructure can be exercised without exposing protected implementation details.
+
+The qualification boundary is:
+
+PUBLIC MOCK ADAPTER: TESTED
+
+DOCKER HARNESS: TESTED
+
+EVIDENCE PIPELINE: TESTED
+
+CANONICAL PUBLIC EVALUATOR: TESTED
+
+PROTECTED VRP RUNTIME: NOT TESTED / NOT DISCLOSED
+
+An external evaluator must distinguish harness qualification from protected-runtime evaluation.
+
+---
+
 Sample Evidence Verification
 
-The reproduced standalone evaluation independently verified the bundled public sample evidence.
+The standalone evaluation independently verified the bundled public sample evidence.
 
-For the recorded run:
+Recorded verification included matching expected and computed hashes:
 
 expected_hash=
 68652f20d5a9a3fabbf3815005944bc4f6c721ced682f51a4c0650aec7051259
@@ -460,27 +691,36 @@ persistent active path
 The required ordering is:
 
 RECEIVE
-    ↓
+    |
+    v
 OBSERVE
-    ↓
+    |
+    v
 DECODE
-    ↓
+    |
+    v
 ADMIT
-    ↓
+    |
+    v
 AUTHORIZE
-    ↓
+    |
+    v
 ADOPT
 
 The unsafe ordering is:
 
 RECEIVE
-    ↓
+    |
+    v
 OBSERVE
-    ↓
+    |
+    v
 MUTATE PERSISTENT PATH
-    ↓
+    |
+    v
 VALIDATE
-    ↓
+    |
+    v
 REJECT
 
 A correct rejection verdict is insufficient if rejected input has already modified persistent state.
@@ -493,20 +733,18 @@ Adversarial Path Validation
 
 The transport-path boundary has been exercised against independent rejection classes including:
 
-wrong session identity
-
-stale epoch
-
-replayed packet
+- wrong session identity;
+- stale epoch;
+- replayed packet.
 
 For each tested rejection class, the required postcondition is:
 
 packet rejected
-
+        +
 canonical mutation not committed
-
+        +
 active path unchanged
-
+        +
 transport change count unchanged
 
 A legitimate admitted replacement path is used as a positive control.
@@ -514,13 +752,17 @@ A legitimate admitted replacement path is used as a positive control.
 The expected positive result is:
 
 legitimate candidate observed
-    ↓
+        |
+        v
 packet admitted
-    ↓
+        |
+        v
 path replacement authorized
-    ↓
+        |
+        v
 active path replaced
-    ↓
+        |
+        v
 transport change recorded
 
 This demonstrates that the security boundary does not simply disable migration.
@@ -559,19 +801,23 @@ Conceptually:
 
 active = legitimate A
 
-    ↓
+        |
+        v
 
 rejected B arrives
 
-    ↓
+        |
+        v
 
 active = legitimate A
 
-    ↓
+        |
+        v
 
 legitimate C arrives
 
-    ↓
+        |
+        v
 
 active = legitimate C
 
@@ -606,7 +852,8 @@ They are related but must not be permanently treated as identical without an exp
 For example:
 
 canonical mutation already committed
-    ↓
+        |
+        v
 duplicate execution suppressed
 
 answers whether canonical state should execute again.
@@ -630,12 +877,14 @@ That authority boundary requires independent evidence.
 The validated baseline remains:
 
 rejected traffic
-    => no persistent path mutation
+    =>
+no persistent path mutation
 
 while:
 
 legitimate admitted migration
-    => path replacement preserved
+    =>
+path replacement preserved
 
 ---
 
@@ -686,19 +935,13 @@ LOCAL_REMOTE_IDENTITY=PASS
 
 The qualification included:
 
-targeted invariant validation
-
-repeated target execution
-
-race-detector target execution
-
-canonical wire regression validation
-
-full repository validation
-
-full repository race validation
-
-real UDP end-to-end validation
+- targeted invariant validation;
+- repeated target execution;
+- race-detector target execution;
+- canonical wire regression validation;
+- full repository validation;
+- full repository race validation;
+- real UDP end-to-end validation.
 
 Qualified result:
 
@@ -732,7 +975,7 @@ Release and Pilot Status
 
 The current public validation boundary includes release-closeout and pilot-oriented evaluation material.
 
-Current release documentation includes:
+Current documentation includes:
 
 - Release Closeout;
 - Black-Box Boundary Audit;
@@ -781,25 +1024,25 @@ Standalone Public Evaluation
 
 - Git
 - Go 1.24+
-- Bash for "scripts/public-evaluate.sh"
+- Bash
 
 Docker Continuity Evidence Lab
 
 - Linux
 - Docker Engine
-- Docker Compose v2
+- Docker Compose
 - Bash
-- sha256sum
+- "sha256sum"
 - Linux bridge networking
-- authorized subject image
+- compatible configured subject image
 
-The protected subject image is supplied separately.
+The protected production subject is supplied separately when applicable.
 
 It is not included in this repository.
 
 Android Termux can inspect the repository and execute the standalone public evaluation surface.
 
-The Docker Continuity Evidence Lab requires a Docker-capable Linux host and an authorized subject image.
+The Docker Continuity Evidence Lab requires a Docker-capable Linux host and a compatible subject image.
 
 ---
 
@@ -813,24 +1056,25 @@ cd vrp-validation-kit
 Record the evaluated source identity:
 
 git rev-parse HEAD
-git rev-parse HEAD^{tree}
-
-Check the worktree:
-
+git rev-parse 'HEAD^{tree}'
 git status --short
 
 For the current "main" public evaluation surface, run:
 
 ./scripts/public-evaluate.sh
 
-The evaluator records the environment, executes the available public stages, generates evaluation artifacts, and reports unavailable optional capabilities separately.
+The evaluator records the environment, executes the available public stages, generates evaluation artifacts, and reports unavailable capabilities separately.
 
 A result containing:
 
 STATUS=SKIPPED
 note=SKIPPED_IS_NOT_PASS
 
-must not be represented as a successful execution of that skipped capability.
+must not be represented as successful execution of that skipped capability.
+
+For Docker stages, a completed scenario is not sufficient.
+
+The applicable evidence must also pass verification.
 
 ---
 
@@ -842,7 +1086,7 @@ Validation Contract
 
 go run ./cmd/vrp-test
 
-Expected terminal verdict at the current checkpoint:
+Expected terminal contract verdict:
 
 FINAL_VERDICT=VALIDATION_CONTRACT_AVAILABLE
 
@@ -850,7 +1094,7 @@ Runtime Scenario Contract
 
 go run ./cmd/vrp-runtime-scenario
 
-Expected terminal verdict at the current checkpoint:
+Expected terminal contract verdict:
 
 FINAL_VERDICT=CONTINUITY_CONTRACT_AVAILABLE
 
@@ -858,7 +1102,7 @@ Adversarial Attack Contract
 
 go run ./cmd/attack-suite
 
-Expected terminal verdict at the current checkpoint:
+Expected terminal verdict:
 
 FINAL_VERDICT=ATTACK_SUITE_PASSED
 
@@ -878,17 +1122,15 @@ Full Public Evaluation Capsule
 
 go run ./cmd/vrp-evaluate run
 
-or use the repository-level orchestrator:
+or use the preferred repository-level orchestrator:
 
 ./scripts/public-evaluate.sh
-
-The repository-level orchestrator is preferred when recording a complete reproducibility result.
 
 ---
 
 Docker Continuity Evidence Lab
 
-The Docker Continuity Evidence Lab evaluates an authorized black-box subject through an evidence-only public interface.
+The Docker Continuity Evidence Lab evaluates a configured black-box subject through an evidence-only public interface.
 
 The lab controls only:
 
@@ -909,44 +1151,71 @@ The lab never requires disclosure of:
 
 Docker availability alone is insufficient.
 
-A valid Docker black-box evaluation also requires an authorized subject image compatible with the public adapter contract.
+A valid black-box subject evaluation also requires a compatible subject image.
 
 ---
 
 Public Docker Scenarios
 
-The repository currently includes five public Docker scenarios.
+The current repository contains four published Docker scenario configuration files.
 
 Scenario| Purpose
 "wifi-to-mobile"| Logical path migration
 "blackout-recovery"| Recovery after complete connectivity loss
 "replay-attempt"| Replay rejection
 "stale-authority"| Authority freshness validation
-"loss50-latency200"| Latency impairment using Toxiproxy
+
+Do not report scenarios that are not present in the evaluated checkout.
+
+Always inspect the exact repository state being evaluated.
+
+---
+
+Public Docker Harness Reproduction
+
+For public harness qualification, the repository's public mock adapter may be built locally.
+
+Example:
+
+docker build \
+  --tag vrp-subject-local:test \
+  docker/continuity-lab/subject
+
+Configure the harness:
+
+export VRP_LAB_SUBJECT_IMAGE=vrp-subject-local:test
+
+This image is a public mock adapter.
+
+It is not the protected VRP production runtime.
+
+Therefore, results obtained using this image must be interpreted as qualification of the public Docker harness and evidence pipeline.
+
+They must not be represented as protected-runtime validation.
 
 ---
 
 Running the Docker Lab
 
-The Docker lab requires a separately supplied authorized subject image.
+Select the intended compatible subject image:
 
-Select the authorized image:
-
-export VRP_LAB_SUBJECT_IMAGE=<AUTHORIZED_SUBJECT_IMAGE>
-
-Do not substitute an arbitrary image and interpret the resulting execution as VRP validation.
+export VRP_LAB_SUBJECT_IMAGE=<SUBJECT_IMAGE>
 
 Run a published scenario, for example:
 
 ./docker/continuity-lab/scripts/run-scenario.sh \
 docker/continuity-lab/configs/wifi-to-mobile.yaml
 
-Another published scenario:
+Another example:
 
 ./docker/continuity-lab/scripts/run-scenario.sh \
-docker/continuity-lab/configs/loss50-latency200.yaml
+docker/continuity-lab/configs/blackout-recovery.yaml
 
-After execution, identify the generated run directory and verify its evidence:
+The runner reports the generated run directory.
+
+A completed run requires evidence verification.
+
+Verify the generated evidence:
 
 ./docker/continuity-lab/scripts/verify-evidence.sh \
 docker/continuity-lab/out/<RUN_ID>
@@ -955,15 +1224,23 @@ Only the verifier output from the actual run should be used when reporting the s
 
 Do not assume a PASS before execution.
 
+Do not treat:
+
+RUN_STATE=COMPLETE
+
+as equivalent to:
+
+VERDICT=PASS
+
 ---
 
 Manual Cable Pull Evaluation
 
-The Wi-Fi → Mobile scenario can be used as part of an authorized continuity evaluation where the environment and subject are configured for the intended network transition.
+The Wi-Fi → Mobile scenario may be used as part of an authorized continuity evaluation where the environment and subject are configured for the intended network transition.
 
-Start the scenario using the authorized subject:
+Start the scenario using the intended subject:
 
-export VRP_LAB_SUBJECT_IMAGE=<AUTHORIZED_SUBJECT_IMAGE>
+export VRP_LAB_SUBJECT_IMAGE=<SUBJECT_IMAGE>
 
 ./docker/continuity-lab/scripts/run-scenario.sh \
 docker/continuity-lab/configs/wifi-to-mobile.yaml
@@ -983,40 +1260,9 @@ After the run, verify the generated evidence:
 ./docker/continuity-lab/scripts/verify-evidence.sh \
 docker/continuity-lab/out/<RUN_ID>
 
-A scenario must not be reported as PASS merely because the harness started successfully.
+A scenario must not be reported as PASS merely because the harness started or completed successfully.
 
 The final claim must be based on the generated evidence and verifier result.
-
----
-
-Latency Impairment Scenario
-
-Scenario:
-
-docker/continuity-lab/configs/loss50-latency200.yaml
-
-Purpose:
-
-Inject deterministic impairment through the public Docker proxy layer while evaluating externally observable continuity behavior.
-
-The published scenario includes:
-
-- 200 ms latency impairment;
-- logical-path evaluation;
-- deterministic scenario configuration;
-- public witness evidence.
-
-The protected runtime remains opaque.
-
-Run:
-
-./docker/continuity-lab/scripts/run-scenario.sh \
-docker/continuity-lab/configs/loss50-latency200.yaml
-
-Then verify the generated run:
-
-./docker/continuity-lab/scripts/verify-evidence.sh \
-docker/continuity-lab/out/<RUN_ID>
 
 ---
 
@@ -1030,6 +1276,8 @@ network.toxic.added
 network.toxic.removed
 subject.completed
 run.completed
+
+Exact events depend on the scenario and evaluated checkpoint.
 
 The public evidence boundary is designed not to expose protected runtime implementation information.
 
@@ -1098,15 +1346,20 @@ Protected implementation details remain outside the evaluation boundary.
 The engineering discipline can be summarized as:
 
 CLAIM
-  ↓
+  |
+  v
 DECLARED INVARIANT
-  ↓
+  |
+  v
 ADVERSARIAL SCENARIO
-  ↓
+  |
+  v
 OBSERVABLE EVIDENCE
-  ↓
+  |
+  v
 DETERMINISTIC VERIFICATION
-  ↓
+  |
+  v
 PASS / FAIL / INCOMPLETE
 
 No claim should exceed its evidence.
@@ -1121,6 +1374,8 @@ verdict alone is not enough
 
 postcondition matters
 
+scenario completion is not verified PASS
+
 rejected input must not leave unauthorized persistent state
 
 positive controls must preserve legitimate behavior
@@ -1133,7 +1388,7 @@ skipped capability is not a passed capability
 
 model execution is not protected-runtime execution
 
-This means a test should not merely demonstrate:
+A test should not merely demonstrate:
 
 REJECTED
 
@@ -1143,7 +1398,19 @@ REJECTED
     +
 STATE PRESERVED
 
-Likewise, a security hardening should not be accepted if it achieves rejection by destroying legitimate continuity.
+Likewise, a Docker scenario should not merely demonstrate:
+
+EXECUTION COMPLETED
+
+when the evaluation claim requires:
+
+EXECUTION COMPLETED
+    +
+EVIDENCE PRODUCED
+    +
+EVIDENCE VERIFIED
+
+A security hardening should not be accepted if it achieves rejection by destroying legitimate continuity.
 
 Both negative and positive behavior matter.
 
@@ -1159,7 +1426,7 @@ Scenario
 Infrastructure
       |
       v
-Authorized Subject
+Configured Subject
       |
       v
 Public Witness
@@ -1199,6 +1466,8 @@ What PASS Means
 
 A successful PASS means that the executed evaluation satisfied the declared public conditions evaluated by that stage, scenario, or verifier.
 
+For Docker scenarios in the canonical evaluator, PASS requires successful evidence verification.
+
 PASS does not mean:
 
 - formal verification;
@@ -1210,6 +1479,8 @@ PASS does not mean:
 - third-party endorsement.
 
 A standalone public-contract PASS must not be represented as a Docker black-box PASS.
+
+A public mock-adapter Docker PASS must not be represented as protected-runtime validation.
 
 A Docker scenario PASS must not be generalized to scenarios that were not executed.
 
@@ -1223,7 +1494,7 @@ Examples include:
 
 - Docker unavailable on the host;
 - required host capability unavailable;
-- authorized subject unavailable;
+- required subject unavailable;
 - scenario not applicable to the current environment.
 
 The rule is explicit:
@@ -1240,6 +1511,9 @@ A FAIL verdict indicates that one or more required conditions for the executed e
 
 Examples may include:
 
+- scenario execution failure;
+- generated run directory unavailable;
+- evidence verification failure;
 - missing required evidence;
 - duplicate acceptance;
 - unexpected continuity-reference replacement;
@@ -1313,13 +1587,13 @@ For checkpoint-specific claims, evaluators should use the commit and tree record
 
 Recommended Independent Evaluation Procedure
 
-For a standalone evaluation:
+For standalone evaluation:
 
 git clone https://github.com/Endless33/vrp-validation-kit.git
 cd vrp-validation-kit
 
 git rev-parse HEAD
-git rev-parse HEAD^{tree}
+git rev-parse 'HEAD^{tree}'
 git status --short
 
 ./scripts/public-evaluate.sh
@@ -1343,10 +1617,12 @@ For Docker evaluation, additionally record:
 
 - Docker Engine version;
 - Docker Compose version;
-- authorized subject identity/version;
+- subject identity/version;
 - scenario configuration;
 - generated evidence directory;
 - verifier output.
+
+Do not report a Docker PASS unless the corresponding evidence verifier passed.
 
 ---
 
@@ -1354,7 +1630,7 @@ Security Model
 
 The public evaluation environment follows a strict separation principle.
 
-Public:
+Public
 
 - Docker topology;
 - witness events;
@@ -1365,7 +1641,7 @@ Public:
 - validation methodology;
 - checkpoint identities.
 
-Protected:
+Protected
 
 - runtime implementation;
 - protocol algorithms;
@@ -1442,6 +1718,58 @@ The repository is not a reference implementation of the protected runtime.
 
 ---
 
+From Public Evaluation to Pilot
+
+The public Validation Kit is intended to answer the first engineering question:
+
+Can the published evaluation boundary be reproduced independently?
+
+Clone it.
+
+Record the exact source identity.
+
+Run the evaluator.
+
+Inspect the generated evidence.
+
+Run the verifier.
+
+Try the adversarial scenarios.
+
+Do not trust a claimed PASS.
+
+Produce your own result.
+
+If your independent evaluation satisfies the published boundary and you want to evaluate VRP beyond the public mock and public contract surface, the next step is a controlled pilot or technical evaluation using the protected runtime boundary.
+
+For pilot, engineering, infrastructure, security, red-team, or integration discussions:
+
+LinkedIn: send Vitalijus Riabovas a direct message.
+
+Primary VRP contact:
+
+jumpingvpn@proton.me
+
+Alternative contact:
+
+riabovasvitalijus@gmail.com
+
+Pilot application:
+
+https://tally.so/r/ZjQLN0
+
+A pilot is the appropriate next step for teams that want to move from:
+
+PUBLIC CONTRACT EVALUATION
+
+to:
+
+CONTROLLED PROTECTED-RUNTIME EVALUATION
+
+without requiring public disclosure of the protected implementation.
+
+---
+
 Reporting Issues
 
 Bug reports and reproducible counterexamples are welcome.
@@ -1455,6 +1783,7 @@ Please include:
 - architecture;
 - Go version;
 - Docker version where applicable;
+- subject identity where applicable;
 - verifier output;
 - "verification.json" where applicable;
 - "manifest.json" where applicable;
@@ -1511,6 +1840,18 @@ Pilot and technical evaluation:
 
 jumpingvpn@proton.me
 
+Alternative contact:
+
+riabovasvitalijus@gmail.com
+
+LinkedIn:
+
+Direct message Vitalijus Riabovas.
+
+Pilot application:
+
+https://tally.so/r/ZjQLN0
+
 Repository:
 
 https://github.com/Endless33/vrp-validation-kit
@@ -1555,6 +1896,14 @@ REJECTION != PARTIAL COMMIT
 
 EXECUTION AUTHORITY != TRANSPORT AUTHORITY
 
+SCENARIO COMPLETE != VERIFIED PASS
+
+SKIPPED != PASS
+
+PUBLIC CONTRACT MODEL != PROTECTED RUNTIME EXECUTION
+
+PUBLIC MOCK ADAPTER != PROTECTED RUNTIME
+
 The validated transport-path work adds a concrete consequence:
 
 rejected traffic may be observed
@@ -1567,19 +1916,65 @@ while:
 
 legitimate authorized transport replacement remains possible
 
-The reproducibility model adds another:
+The evaluator hardening adds another:
 
-SKIPPED != PASS
+EXECUTE
+    ->
+PRODUCE EVIDENCE
+    ->
+VERIFY EVIDENCE
+    ->
+PASS
 
-and:
+not:
 
-PUBLIC CONTRACT MODEL != PROTECTED RUNTIME EXECUTION
+EXECUTE
+    ->
+ASSUME PASS
+
+The current qualified public evaluator checkpoint is:
+
+COMMIT:
+da5925fc1596d1b8350c24c3b822bc5820c6fe6d
+
+TREE:
+92f5e67ee1ae9188dd7a1fe5967bfac26e81eaff
+
+The recorded Oracle Linux qualification produced:
+
+PASSED=12
+FAILED=0
+SKIPPED=0
+
+DOCKER_SCENARIOS_EXECUTED=4_OF_4
+DOCKER_SCENARIOS_VERIFIED=4_OF_4
+
+FINAL_RC=0
+FINAL_VERDICT=PUBLIC_EVALUATION_PASSED
+
+using the public mock adapter.
+
+That result qualifies the public evaluator, Docker harness, and evidence pipeline.
+
+It does not claim protected-runtime execution.
+
+Independent evaluators should reproduce the result themselves rather than trust this README.
+
+If the public boundary passes under your own evaluation and you want to test the protected VRP runtime under your infrastructure, failure model, or adversarial conditions:
+
+move to a controlled pilot.
+
+Contact:
+
+jumpingvpn@proton.me
+
+or send a LinkedIn DM to Vitalijus Riabovas.
 
 Evidence is public.
 
 Behavior is reproducible within the evaluated boundary.
 
-Claims are bounded by validation.
+Claims remain bounded by validation.
 
 Implementation remains protected.
 
