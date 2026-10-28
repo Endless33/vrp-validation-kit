@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"sync"
 )
 
 const (
@@ -13,11 +14,14 @@ const (
 // Window is a standalone PUBLIC invariant model.
 // It is NOT the protected VRP replay implementation.
 type Window struct {
+	mu          sync.Mutex
 	initialized bool
 	maxSeen     uint64
 }
 
 func (w *Window) Accept(seq uint64) bool {
+	w.mu.Lock()
+	defer w.mu.Unlock()
 	if !w.initialized {
 		w.initialized = true
 		w.maxSeen = seq
