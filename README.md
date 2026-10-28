@@ -1,6 +1,6 @@
 VRP External Validation Kit
 
-Public engineering evaluation for observable VRP behavior, invariant preservation, adversarial conditions, transport-path authority, and evidence verification.
+Public engineering evaluation for observable VRP behavior, invariant preservation, adversarial conditions, transport-path authority, replay containment, and evidence verification.
 
 VRP — Veil Routing Protocol
 
@@ -28,13 +28,16 @@ https://tally.so/r/ZjQLN0
 
 Purpose
 
-The VRP External Validation Kit provides public tools, scenarios, evidence verifiers, and documentation for evaluating declared VRP behavior without publishing the protected runtime implementation.
+The VRP External Validation Kit provides public tools, scenarios, evidence verifiers, adversarial models, and documentation for evaluating declared VRP behavior without publishing the protected runtime implementation.
 
 The repository focuses on externally observable properties and declared public contracts including:
 
 - continuity-reference preservation;
 - transport-independent logical-session behavior;
 - replay containment;
+- repeated duplicate-sequence rejection;
+- canonical-state preservation under replay pressure;
+- legitimate progress after rejected replay attempts;
 - duplicate-commit rejection;
 - stale-authority rejection;
 - epoch rollback rejection;
@@ -52,6 +55,20 @@ The repository focuses on externally observable properties and declared public c
 The objective is not agreement.
 
 The objective is reproducible evaluation.
+
+Do not trust a screenshot.
+
+Do not trust a claimed PASS.
+
+Clone the repository.
+
+Record the source identity.
+
+Run the evaluation.
+
+Try to break the declared invariant.
+
+Produce your own result.
 
 ---
 
@@ -115,9 +132,239 @@ The objective is to prevent unauthorized transport replacement.
 
 ---
 
+Public Replay-Storm Invariant
+
+The current public validation surface also includes a reproducible standalone replay-invariant stress model.
+
+The declared invariant is:
+
+DUPLICATE_SEQUENCE_REPLAY
+        |
+        v
+REJECT
+        |
+        v
+NO CANONICAL SEQUENCE ADVANCE
+        |
+        v
+REPEAT
+        |
+        v
+LEGITIMATE NEXT SEQUENCE STILL ACCEPTED
+
+The current public stress case executes:
+
+ATTACK_ATTEMPTS=9999
+
+against the same already-observed sequence value.
+
+The required result is:
+
+REPLAY_REJECTED=9999
+REPLAY_ACCEPTED=0
+STATE_PRESERVED_DURING_ATTACK=true
+NEXT_SEQUENCE_ACCEPTED=true
+FINAL_VERDICT=PASS
+
+The important property is not merely:
+
+REPLAY_REJECTED
+
+The stronger evaluated postcondition is:
+
+REPLAY_REJECTED
+    +
+CANONICAL STATE UNCHANGED
+    +
+LEGITIMATE PROGRESS PRESERVED
+
+In compact form:
+
+REJECTED REPLAY != STATE MUTATION
+
+and:
+
+REPLAY CONTAINMENT != SESSION DEADLOCK
+
+The model therefore includes both:
+
+- a negative control: 9,999 duplicate sequence presentations must not be accepted;
+- a positive control: the next legitimate sequence must still be accepted.
+
+This prevents a false security result in which replay is "stopped" only because all future progress has also been destroyed.
+
+---
+
+Replay-Storm Claim Boundary
+
+The public "9,999" validator is intentionally narrow.
+
+It is a:
+
+PUBLIC STANDALONE REPLAY-INVARIANT MODEL
+
+It is not a claim that:
+
+- 9,999 UDP packets traversed the protected VRP runtime;
+- the protected runtime source is included;
+- transport was exercised;
+- every possible replay strategy was evaluated;
+- formal replay resistance was proven;
+- production security certification was obtained.
+
+The validator exercises the published sequence-window invariant as a reproducible public model.
+
+Its output explicitly reports:
+
+MODE=PUBLIC_STANDALONE_INVARIANT_VALIDATION
+PROTECTED_RUNTIME_SOURCE=NOT_INCLUDED
+TRANSPORT=NOT_EXERCISED
+
+This distinction is intentional.
+
+No public claim should exceed the evidence produced by the public test.
+
+---
+
+Reproduce the 9,999 Replay-Storm Validation
+
+Anyone with Git and Go can reproduce the public replay-invariant stress case.
+
+Fresh Clone
+
+git clone https://github.com/Endless33/vrp-validation-kit.git
+cd vrp-validation-kit
+
+git rev-parse HEAD
+git rev-parse 'HEAD^{tree}'
+git status --short
+
+go run ./cmd/vrp-replay-storm-9999
+
+Existing Clone
+
+cd vrp-validation-kit
+
+git pull origin main
+
+git rev-parse HEAD
+git rev-parse 'HEAD^{tree}'
+git status --short
+
+go run ./cmd/vrp-replay-storm-9999
+
+Expected invariant result:
+
+ATTACK_TYPE=DUPLICATE_SEQUENCE_REPLAY
+ATTACK_ATTEMPTS=9999
+REPLAY_REJECTED=9999
+REPLAY_ACCEPTED=0
+CANONICAL_MAX_BEFORE_ATTACK=1000
+CANONICAL_MAX_AFTER_ATTACK=1000
+STATE_PRESERVED_DURING_ATTACK=true
+NEXT_LEGITIMATE_SEQUENCE=1001
+NEXT_SEQUENCE_ACCEPTED=true
+REJECTION_RATE=100.00%
+DUPLICATE_ACCEPTANCE=0
+LEGITIMATE_PROGRESS=PRESERVED
+FINAL_VERDICT=PASS
+
+The executable should return process exit code "0" only when its declared invariant conditions hold.
+
+---
+
+Qualified Public Replay-Storm Checkpoint
+
+The public replay-storm validator was committed and pushed to public "main" at:
+
+COMMIT:
+2f718ea37a2ee111a154f9fe105bad143fe09978
+
+TREE:
+10187340294bdbe63eb6899da840dd7fc936a39a
+
+FILE:
+cmd/vrp-replay-storm-9999/main.go
+
+FILE_SHA256:
+d35e5974161f76a79bcc6f7875e0482baf10abbc6eb87c08e7b171dec322b029
+
+Post-push qualification recorded:
+
+PUBLIC_REPLAY_STORM_9999=PASS
+
+ATTACK_ATTEMPTS=9999
+REPLAY_REJECTED=9999
+REPLAY_ACCEPTED=0
+
+STATE_PRESERVED_DURING_ATTACK=YES
+NEXT_LEGITIMATE_SEQUENCE_ACCEPTED=YES
+
+LOCAL_REMOTE_IDENTITY=PASS
+REMOTE_TREE_IDENTITY=PASS
+REMOTE_FILE_IDENTITY=PASS
+POST_PUSH_VALIDATION=PASS
+PUSH_PERFORMED=YES
+
+The committed file boundary contained exactly:
+
+cmd/vrp-replay-storm-9999/main.go
+
+The validator was re-executed after push and produced:
+
+FINAL_VERDICT=PASS
+
+Evaluators should still record their own checkout before execution.
+
+The checkpoint above identifies the qualified public artifact.
+
+It is not a substitute for recording the source identity actually evaluated by another party.
+
+---
+
+Challenge the Replay Result
+
+The public replay model exists to be challenged.
+
+External evaluators are encouraged to:
+
+- clone the repository;
+- record the exact commit and tree;
+- inspect the public validator;
+- run it unchanged;
+- modify replay sequences;
+- change attempt counts;
+- test boundary values;
+- test repeated duplicates;
+- test stale values;
+- test legitimate progression after rejection;
+- attempt to produce unexpected canonical-state advancement;
+- attempt to produce duplicate acceptance;
+- attempt to prevent legitimate progress after the attack;
+- report reproducible counterexamples.
+
+A useful counterexample should include:
+
+COMMIT
+TREE
+OS
+ARCHITECTURE
+GO VERSION
+COMMAND
+INPUT
+EXPECTED RESULT
+OBSERVED RESULT
+PROCESS EXIT CODE
+
+If the public invariant can be broken, the useful result is not an argument.
+
+The useful result is a reproduction.
+
+---
+
 Evidence-Gated Evaluation Principle
 
-The public evaluator now enforces another important distinction:
+The public evaluator enforces another important distinction:
 
 SCENARIO EXECUTION COMPLETE != VERIFIED PASS
 
@@ -173,13 +420,13 @@ A Docker scenario may be reported as PASS by the canonical evaluator only after 
 
 Evaluation Boundary
 
-This repository contains public validation models, adversarial contract models, evidence verifiers, documentation, and a Docker-based black-box evaluation harness.
+This repository contains public validation models, adversarial contract models, evidence verifiers, documentation, standalone stress validators, and a Docker-based black-box evaluation harness.
 
 It does not contain the production VRP runtime.
 
 The standalone Go programs expose and exercise declared public validation contracts.
 
-They do not execute or disclose the protected production runtime.
+They do not execute or disclose the protected production runtime unless a separately supplied protected subject is explicitly connected through an authorized evaluation boundary.
 
 The Docker Continuity Evidence Lab evaluates a separately supplied compatible black-box subject image through a public adapter contract.
 
@@ -236,9 +483,9 @@ Release Boundary
 Reference| Scope| Intended Use
 "v1.0.0"| Baseline public Go validation harness and early evaluation surface| Historical baseline reproduction
 "v1.1.0"| Signed public validation/evidence release| Integrity-anchored public evaluation
-"main"| Current evaluator, evidence verification, Docker Continuity Evidence Lab, transport-path validation, reproducibility work, and extended documentation| Current engineering evaluation
+"main"| Current evaluator, evidence verification, Docker Continuity Evidence Lab, transport-path validation, replay-storm validation, reproducibility work, and extended documentation| Current engineering evaluation
 
-The Docker Continuity Evidence Lab, evidence-verification components, evaluation capsule, transport-path authority documentation, and later reproducibility work extend the original "v1.0.0" baseline.
+The Docker Continuity Evidence Lab, evidence-verification components, evaluation capsule, transport-path authority documentation, replay-storm validator, and later reproducibility work extend the original "v1.0.0" baseline.
 
 When reporting results from "main", always include the exact evaluated commit hash.
 
@@ -248,9 +495,9 @@ Do not assume that results from one commit automatically apply to another.
 
 ---
 
-Current Main Checkpoint
+Qualified Evaluator Checkpoint
 
-The current qualified public evaluator checkpoint is:
+The evidence-gated canonical public evaluator qualification is anchored to:
 
 COMMIT:
 da5925fc1596d1b8350c24c3b822bc5820c6fe6d
@@ -261,12 +508,30 @@ TREE:
 SUBJECT:
 evaluation: gate Docker scenario pass on verified evidence
 
-The checkpoint was pushed to public "main" and subsequently verified with matching local and remote identities:
+That checkpoint qualified the evaluator behavior described in the corresponding validation work.
 
-LOCAL_EQUALS_ORIGIN=YES
-LOCAL_TREE_EQUALS_ORIGIN_TREE=YES
-AHEAD=0
-BEHIND=0
+It should not be confused with the later replay-storm checkpoint.
+
+---
+
+Current Public Replay Checkpoint
+
+The later public replay-storm validation checkpoint is:
+
+COMMIT:
+2f718ea37a2ee111a154f9fe105bad143fe09978
+
+TREE:
+10187340294bdbe63eb6899da840dd7fc936a39a
+
+SUBJECT:
+validation: add public 9999 replay storm validator
+
+At qualification time:
+
+LOCAL_REMOTE_IDENTITY=PASS
+REMOTE_TREE_IDENTITY=PASS
+REMOTE_FILE_IDENTITY=PASS
 
 Evaluators must still record their own checkout before execution:
 
@@ -274,9 +539,9 @@ git rev-parse HEAD
 git rev-parse 'HEAD^{tree}'
 git status --short
 
-The identities above describe the qualified checkpoint.
+Checkpoint identities describe qualified repository states.
 
-They are not a substitute for recording the evaluator's actual checkout.
+They are not substitutes for recording the evaluator's actual checkout.
 
 ---
 
@@ -285,6 +550,7 @@ Current Status
 The current repository state includes:
 
 - public Go validation-contract executables;
+- public 9,999 replay-storm invariant validator;
 - public evaluation capsule;
 - public evaluation orchestrator;
 - external adversarial contract model;
@@ -305,7 +571,8 @@ The current repository state includes:
 - real UDP path-authority validation;
 - execution-authority vs transport-authority boundary documentation;
 - immutable validation checkpoint records;
-- evidence-gated Docker PASS semantics.
+- evidence-gated Docker PASS semantics;
+- explicit public replay-model claim boundaries.
 
 The currently published Docker scenario configuration files are:
 
@@ -332,6 +599,10 @@ Controlled Docker Continuity Evidence Lab work currently includes:
 - Stale Authority.
 
 Docker scenario results must be distinguished from standalone public-contract execution.
+
+The standalone "9,999" replay-storm validator must also be distinguished from the Docker replay scenario.
+
+They are different evaluation surfaces.
 
 A host that does not execute the Docker lab must report Docker as unavailable or skipped where applicable.
 
@@ -361,6 +632,7 @@ The current public Go command surface includes:
 cmd/attack-suite
 cmd/evidence-verify
 cmd/vrp-evaluate
+cmd/vrp-replay-storm-9999
 cmd/vrp-runtime-scenario
 cmd/vrp-test
 
@@ -368,13 +640,17 @@ The repository also provides the top-level public evaluation orchestrator:
 
 scripts/public-evaluate.sh
 
-Evaluators should prefer the orchestrator for a complete public evaluation because it records environment information, executes the available public stages, hashes generated artifacts, distinguishes unavailable capabilities from successful ones, and gates Docker PASS on evidence verification.
+Evaluators should prefer the orchestrator for the complete public evaluation surface supported by the evaluated checkout.
+
+The standalone replay-storm command may also be executed independently:
+
+go run ./cmd/vrp-replay-storm-9999
 
 ---
 
 Canonical Public Evaluation Entry Point
 
-For the current "main" evaluation surface, the recommended entry point is:
+For the current "main" evaluation surface, the recommended repository-level entry point is:
 
 ./scripts/public-evaluate.sh
 
@@ -408,6 +684,8 @@ The evaluator explicitly preserves the distinction:
 
 SKIPPED_IS_NOT_PASS
 
+The standalone replay-storm validator may be executed separately when specifically evaluating the published "9,999" duplicate-sequence invariant.
+
 ---
 
 Important Interpretation of "go test ./..."
@@ -418,19 +696,29 @@ go test ./...
 
 is useful as a Go package compilation/test-discovery check.
 
-During the recorded public reproduction work, the public command packages contained no "*_test.go" files.
+A package reporting:
+
+[no test files]
+
+does not mean a hidden test suite executed.
+
+For example, the replay-storm package may compile successfully under:
+
+go test ./cmd/vrp-replay-storm-9999
+
+while its executable validation logic is actually exercised with:
+
+go run ./cmd/vrp-replay-storm-9999
 
 Therefore:
 
 go test ./...
 
-must not by itself be described as proof that the public validation contracts, adversarial model, runtime scenario model, or Docker scenarios were executed.
+must not by itself be described as proof that the public validation contracts, replay-storm model, adversarial model, runtime scenario model, or Docker scenarios were executed.
 
-Those surfaces are executed through their corresponding commands or through:
+Those surfaces are executed through their corresponding commands or applicable repository-level evaluator.
 
-./scripts/public-evaluate.sh
-
-A successful "go test ./..." result in that repository state means that the discovered Go packages completed successfully under the Go test command.
+A successful "go test ./..." result means that the discovered Go packages completed successfully under the Go test command.
 
 It does not mean that a hidden or nonexistent unit-test suite was executed.
 
@@ -987,7 +1275,8 @@ Current documentation includes:
 - Real UDP Path Authority Validation;
 - Canonical Ingress Before Path Adoption;
 - Transport Continuity vs Execution Authority;
-- Validation Checkpoint "4cfc77ab".
+- Validation Checkpoint "4cfc77ab";
+- public replay-storm validation at checkpoint "2f718ea".
 
 The public evaluation boundary exposes:
 
@@ -1000,7 +1289,8 @@ The public evaluation boundary exposes:
 - verification reports;
 - artifact hashes;
 - declared architecture invariants;
-- reproducible validation outcomes.
+- reproducible validation outcomes;
+- public adversarial stress models.
 
 The public evaluation boundary does not expose:
 
@@ -1025,6 +1315,11 @@ Standalone Public Evaluation
 - Git
 - Go 1.24+
 - Bash
+
+Standalone Replay-Storm Validator
+
+- Git
+- Go 1.24+
 
 Docker Continuity Evidence Lab
 
@@ -1062,6 +1357,10 @@ git status --short
 For the current "main" public evaluation surface, run:
 
 ./scripts/public-evaluate.sh
+
+To independently reproduce the public "9,999" replay-storm invariant:
+
+go run ./cmd/vrp-replay-storm-9999
 
 The evaluator records the environment, executes the available public stages, generates evaluation artifacts, and reports unavailable capabilities separately.
 
@@ -1105,6 +1404,25 @@ go run ./cmd/attack-suite
 Expected terminal verdict:
 
 FINAL_VERDICT=ATTACK_SUITE_PASSED
+
+Replay-Storm Invariant Validation
+
+go run ./cmd/vrp-replay-storm-9999
+
+Expected key result:
+
+ATTACK_ATTEMPTS=9999
+REPLAY_REJECTED=9999
+REPLAY_ACCEPTED=0
+STATE_PRESERVED_DURING_ATTACK=true
+NEXT_SEQUENCE_ACCEPTED=true
+FINAL_VERDICT=PASS
+
+Boundary:
+
+PUBLIC_STANDALONE_INVARIANT_MODEL
+TRANSPORT_NOT_EXERCISED
+PROTECTED_RUNTIME_NOT_INCLUDED
 
 Environment Doctor
 
@@ -1168,6 +1486,8 @@ Scenario| Purpose
 Do not report scenarios that are not present in the evaluated checkout.
 
 Always inspect the exact repository state being evaluated.
+
+The Docker "replay-attempt" scenario and the standalone "vrp-replay-storm-9999" executable are separate validation surfaces and must not be conflated.
 
 ---
 
@@ -1378,6 +1698,10 @@ scenario completion is not verified PASS
 
 rejected input must not leave unauthorized persistent state
 
+rejected replay must not advance canonical sequence state
+
+replay containment must preserve legitimate future progress
+
 positive controls must preserve legitimate behavior
 
 race-sensitive invariants require race validation
@@ -1397,6 +1721,20 @@ when the security claim actually requires:
 REJECTED
     +
 STATE PRESERVED
+
+Likewise, a replay test should not merely demonstrate:
+
+9999 REJECTIONS
+
+when the stronger claim requires:
+
+9999 REJECTIONS
+    +
+ZERO ACCEPTANCES
+    +
+CANONICAL STATE PRESERVED
+    +
+NEXT LEGITIMATE SEQUENCE ACCEPTED
 
 Likewise, a Docker scenario should not merely demonstrate:
 
@@ -1464,9 +1802,11 @@ Only declared public contracts and externally observable evidence are evaluated.
 
 What PASS Means
 
-A successful PASS means that the executed evaluation satisfied the declared public conditions evaluated by that stage, scenario, or verifier.
+A successful PASS means that the executed evaluation satisfied the declared public conditions evaluated by that stage, scenario, model, or verifier.
 
 For Docker scenarios in the canonical evaluator, PASS requires successful evidence verification.
+
+For the standalone replay-storm validator, PASS means the declared public replay-invariant model satisfied its programmed postconditions during that execution.
 
 PASS does not mean:
 
@@ -1479,6 +1819,8 @@ PASS does not mean:
 - third-party endorsement.
 
 A standalone public-contract PASS must not be represented as a Docker black-box PASS.
+
+A standalone replay-model PASS must not be represented as 9,999 real UDP packets traversing the protected runtime.
 
 A public mock-adapter Docker PASS must not be represented as protected-runtime validation.
 
@@ -1516,6 +1858,8 @@ Examples may include:
 - evidence verification failure;
 - missing required evidence;
 - duplicate acceptance;
+- replay-induced canonical-state advancement;
+- legitimate progress lost after replay rejection;
 - unexpected continuity-reference replacement;
 - invalid event ordering;
 - required witness events not observed;
@@ -1574,9 +1918,9 @@ An evaluator should be able to:
 1. Clone the repository.
 2. Record the exact evaluated commit and tree.
 3. Record the execution environment.
-4. Execute the public evaluator or a published scenario.
-5. Collect generated evidence.
-6. Run the applicable verifier.
+4. Execute the public evaluator, standalone validator, or published scenario.
+5. Collect generated evidence where applicable.
+6. Run the applicable verifier where applicable.
 7. Record the final verdict.
 8. Report unavailable capabilities as unavailable or skipped.
 9. Compare results without requiring protected implementation disclosure.
@@ -1598,6 +1942,10 @@ git status --short
 
 ./scripts/public-evaluate.sh
 
+For the public replay-storm invariant:
+
+go run ./cmd/vrp-replay-storm-9999
+
 Record:
 
 - repository HEAD;
@@ -1606,12 +1954,23 @@ Record:
 - architecture;
 - Go version;
 - evaluator output;
-- generated run ID;
-- PASSED count;
-- FAILED count;
-- SKIPPED count;
+- generated run ID where applicable;
+- PASSED count where applicable;
+- FAILED count where applicable;
+- SKIPPED count where applicable;
 - final verdict;
 - final return code.
+
+For replay-storm reproduction, additionally record:
+
+ATTACK_ATTEMPTS
+REPLAY_REJECTED
+REPLAY_ACCEPTED
+CANONICAL_MAX_BEFORE_ATTACK
+CANONICAL_MAX_AFTER_ATTACK
+STATE_PRESERVED_DURING_ATTACK
+NEXT_SEQUENCE_ACCEPTED
+FINAL_VERDICT
 
 For Docker evaluation, additionally record:
 
@@ -1639,7 +1998,9 @@ Public
 - verification logic;
 - declared security properties;
 - validation methodology;
-- checkpoint identities.
+- checkpoint identities;
+- standalone public adversarial models;
+- replay-stress inputs and results.
 
 Protected
 
@@ -1693,10 +2054,22 @@ The repository is intended for:
 - infrastructure architects;
 - security engineers;
 - red teams;
+- reliability engineers;
+- SRE teams;
+- network engineers;
+- platform engineers;
 - technical evaluators;
+- CTO / architecture teams;
+- CISO / security-review teams;
 - pilot engineering teams.
 
 It is not intended to teach or expose protected implementation details.
+
+For security and architecture reviewers, the preferred evaluation method is simple:
+
+DO NOT REVIEW THE CLAIM FIRST.
+
+REPRODUCE THE RESULT FIRST.
 
 ---
 
@@ -1710,9 +2083,11 @@ This repository exists to support:
 - evidence-first engineering;
 - public invariant contracts;
 - adversarial evaluation;
+- replay containment evaluation;
 - transport-independent continuity research;
 - controlled path replacement;
-- explicit security boundaries.
+- explicit security boundaries;
+- reproducible counterexamples.
 
 The repository is not a reference implementation of the protected runtime.
 
@@ -1730,11 +2105,17 @@ Record the exact source identity.
 
 Run the evaluator.
 
+Run the replay-storm validator.
+
 Inspect the generated evidence.
 
 Run the verifier.
 
 Try the adversarial scenarios.
+
+Change the public inputs.
+
+Try to produce a counterexample.
 
 Do not trust a claimed PASS.
 
@@ -1790,6 +2171,17 @@ Please include:
 - relevant witness events;
 - minimal reproduction steps.
 
+For replay-storm counterexamples, include:
+
+- attack sequence;
+- number of attempts;
+- accepted count;
+- rejected count;
+- canonical state before attack;
+- canonical state after attack;
+- whether legitimate progression remained possible;
+- process exit code.
+
 For transport-path claims, clearly identify:
 
 - the expected invariant;
@@ -1821,6 +2213,7 @@ Examples include:
 - Docker infrastructure;
 - evidence tooling;
 - adversarial test cases;
+- replay boundary cases;
 - independent validation methodology.
 
 Contributions must not introduce:
@@ -1878,6 +2271,8 @@ evaluate observable behavior
 
 reproduce published results
 
+challenge declared invariants
+
 verify evidence independently
 
 preserve implementation confidentiality
@@ -1893,6 +2288,10 @@ OBSERVATION != AUTHORITY
 CANDIDATE_PATH != ACTIVE_PATH
 
 REJECTION != PARTIAL COMMIT
+
+REJECTED REPLAY != STATE MUTATION
+
+REPLAY CONTAINMENT != SESSION DEADLOCK
 
 EXECUTION AUTHORITY != TRANSPORT AUTHORITY
 
@@ -1916,6 +2315,22 @@ while:
 
 legitimate authorized transport replacement remains possible
 
+The replay-storm validation adds another:
+
+9999 DUPLICATE REPLAY ATTEMPTS
+        |
+        v
+9999 REJECTED
+        |
+        v
+0 ACCEPTED
+        |
+        v
+CANONICAL STATE PRESERVED
+        |
+        v
+NEXT LEGITIMATE SEQUENCE ACCEPTED
+
 The evaluator hardening adds another:
 
 EXECUTE
@@ -1932,7 +2347,7 @@ EXECUTE
     ->
 ASSUME PASS
 
-The current qualified public evaluator checkpoint is:
+The evidence-gated evaluator qualification is anchored to:
 
 COMMIT:
 da5925fc1596d1b8350c24c3b822bc5820c6fe6d
@@ -1940,7 +2355,35 @@ da5925fc1596d1b8350c24c3b822bc5820c6fe6d
 TREE:
 92f5e67ee1ae9188dd7a1fe5967bfac26e81eaff
 
-The recorded Oracle Linux qualification produced:
+The public replay-storm validator is anchored to the later checkpoint:
+
+COMMIT:
+2f718ea37a2ee111a154f9fe105bad143fe09978
+
+TREE:
+10187340294bdbe63eb6899da840dd7fc936a39a
+
+FILE_SHA256:
+d35e5974161f76a79bcc6f7875e0482baf10abbc6eb87c08e7b171dec322b029
+
+Its qualified public result is:
+
+ATTACK_ATTEMPTS=9999
+REPLAY_REJECTED=9999
+REPLAY_ACCEPTED=0
+STATE_PRESERVED_DURING_ATTACK=true
+NEXT_SEQUENCE_ACCEPTED=true
+FINAL_VERDICT=PASS
+
+Reproduce it:
+
+git clone https://github.com/Endless33/vrp-validation-kit.git
+cd vrp-validation-kit
+git rev-parse HEAD
+git rev-parse 'HEAD^{tree}'
+go run ./cmd/vrp-replay-storm-9999
+
+The recorded Oracle Linux canonical evaluator qualification produced:
 
 PASSED=12
 FAILED=0
@@ -1958,7 +2401,25 @@ That result qualifies the public evaluator, Docker harness, and evidence pipelin
 
 It does not claim protected-runtime execution.
 
-Independent evaluators should reproduce the result themselves rather than trust this README.
+The "9,999" replay result qualifies the public standalone replay-invariant model.
+
+It does not claim 9,999 UDP packets traversed the protected production runtime.
+
+Independent evaluators should reproduce the results themselves rather than trust this README.
+
+For engineers, architects, CTOs, CISOs, and red teams:
+
+CLONE IT.
+
+HASH IT.
+
+RUN IT.
+
+CHANGE THE INPUT.
+
+TRY TO BREAK THE INVARIANT.
+
+IF IT FAILS, SHOW THE REPRODUCTION.
 
 If the public boundary passes under your own evaluation and you want to test the protected VRP runtime under your infrastructure, failure model, or adversarial conditions:
 
@@ -1973,6 +2434,8 @@ or send a LinkedIn DM to Vitalijus Riabovas.
 Evidence is public.
 
 Behavior is reproducible within the evaluated boundary.
+
+Counterexamples are welcome.
 
 Claims remain bounded by validation.
 
